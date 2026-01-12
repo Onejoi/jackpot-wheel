@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE HEIST: JACKPOT WHEEL 🎰</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- Wheel Section -->
+        <div class="wheel-section">
+            <div class="wheel-container">
+                <canvas id="wheel-canvas" width="300" height="300"></canvas>
+                <div class="wheel-pointer">▼</div>
+                <div class="wheel-center">
+                    <div class="timer" id="timer">00:45</div>
+                    <div class="pot-total">💰 <span id="pot-amount">125.50</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Controls -->
+        <div class="betting-panel">
+            <div class="bet-header">БАНК РАУНДА</div>
+            <div class="bet-actions">
+                <button class="bet-btn" data-amount="0.5">0.5 USDT</button>
+                <button class="bet-btn" data-amount="1">1 USDT</button>
+                <button class="bet-btn" data-amount="5">5 USDT</button>
+                <button class="bet-btn max" data-amount="max">MAX</button>
+            </div>
+        </div>
+
+        <!-- Players List (Feed) -->
+        <div class="players-list" id="players-list">
+            <!-- Dynamic Content -->
+            <div class="player-row">
+                <div class="player-color" style="background: #ef4444;"></div>
+                <div class="player-info">
+                    <div class="player-name">@crypto_king</div>
+                    <div class="player-bet">50.00 USDT</div>
+                </div>
+                <div class="player-percent">40%</div>
+            </div>
+            <div class="player-row">
+                <div class="player-color" style="background: #3b82f6;"></div>
+                <div class="player-info">
+                    <div class="player-name">@lucky_guy</div>
+                    <div class="player-bet">25.50 USDT</div>
+                </div>
+                <div class="player-percent">20%</div>
+            </div>
+            <div class="player-row">
+                <div class="player-color" style="background: #10b981;"></div>
+                <div class="player-info">
+                    <div class="player-name">@you</div>
+                    <div class="player-bet">10.00 USDT</div>
+                </div>
+                <div class="player-percent">8%</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    background-color: #111;
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: #18191c;
+}
+
+/* Wheel Section */
+.wheel-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 20px;
+    background: radial-gradient(circle at center, #2a2d35 0%, #18191c 70%);
+}
+
+.wheel-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+}
+
+#wheel-canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    transform: rotate(-90deg); /* Start at top */
+    transition: transform 5s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    background: #18191c;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    border: 4px solid #2a2d35;
+}
+
+.timer {
+    font-size: 24px;
+    font-weight: 800;
+    color: #ef4444;
+}
+
+.pot-total {
+    font-size: 16px;
+    color: #10b981;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* Betting Panel */
+.betting-panel {
+    background: #232429;
+    padding: 15px;
+    border-top: 2px solid #2a2d35;
+}
+
+.bet-header {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.bet-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.bet-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #343740;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bet-btn:active {
+    transform: scale(0.95);
+}
+
+.bet-btn[data-amount="max"] {
+    background: #f59e0b;
+    color: #111;
+}
+
+/* Players List */
+.players-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #18191c;
+    padding: 10px;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #2a2d35;
+    animation: slideIn 0.3s ease-out;
+}
+
+.player-color {
+    width: 4px;
+    height: 30px;
+    border-radius: 2px;
+    margin-right: 12px;
+}
+
+.player-info {
+    flex: 1;
+}
+
+.player-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.player-bet {
+    font-size: 12px;
+    color: #fbbf24; /* GTA Gold color */
+    font-weight: 600;
+}
+
+.player-percent {
+    font-size: 14px;
+    color: #9ca3af;
+    font-weight: 600;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: #18191c;
+}
+::-webkit-scrollbar-thumb {
+    background: #343740;
+}
