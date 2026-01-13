@@ -21,17 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSpinning = false;
     let timerStarted = false;
     let timerInterval = null;
+    let botInterval = null;
 
     // --- BOTS CONFIGURATION ---
     const botNames = [
         '@crypto_king', '@ton_master', '@lucky_guy', '@whale_🐋',
         '@degen_1337', '@usdt_miner', '@jackpot_hunter', '@moon_boi',
-        '@diamond_hands', '@hustler_tg'
+        '@diamond_hands', '@hustler_tg', '@money_maker', '@rich_kid'
     ];
     const botColors = [
         '#6366f1', '#a855f7', '#ec4899', '#f43f5e',
         '#ef4444', '#f97316', '#eab308', '#22c55e',
-        '#06b6d4', '#3b82f6'
+        '#06b6d4', '#3b82f6', '#10b981', '#fbbf24'
     ];
 
     // --- INITIALIZATION ---
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateBalanceUI();
         updateGameState();
         window.Telegram.WebApp.expand();
+        console.log("GAME LOADED: V2 (AGGRESSIVE BOTS)");
     }
 
     function updateBalanceUI() {
@@ -132,13 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function spawnBotBet() {
         if (isSpinning || !timerStarted) return;
 
-        // Randomly skip a beat for natural feel
-        if (Math.random() > 0.4) return;
+        // AGGRESSIVE: 70% chance to bet every tick
+        if (Math.random() > 0.7) return;
 
         const botIdx = Math.floor(Math.random() * botNames.length);
         const name = botNames[botIdx];
         const color = botColors[botIdx];
-        const amount = (Math.random() * 10 + 0.5); // Random bet 0.5 - 10.5
+        // More random amounts: 1 - 25 USDT
+        const amount = (Math.random() * 24 + 1);
 
         const pIdx = players.findIndex(p => p.name === name);
         if (pIdx >= 0) {
@@ -148,17 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateGameState();
+        console.log(`Bot ${name} placed ${amount.toFixed(2)} USDT`);
     }
 
     // --- INTERACTION ---
     betBtn.addEventListener('click', () => {
         const val = parseFloat(betInput.value);
         if (isNaN(val) || val < 0.1) {
-            window.Telegram.WebApp.showAlert("Min 0.1 USDT");
+            window.Telegram.WebApp.showAlert("Min ставка 0.1 USDT");
             return;
         }
         if (val > myBalance) {
-            window.Telegram.WebApp.showAlert("Мало денег!");
+            window.Telegram.WebApp.showAlert("Недостаточно баланса!");
             return;
         }
 
@@ -193,8 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!timerStarted) {
             startTimer();
             timerStarted = true;
-            // Bot simulation starts
-            setInterval(spawnBotBet, 3000);
+            // Agressive: Bots check every 2 seconds
+            if (botInterval) clearInterval(botInterval);
+            botInterval = setInterval(spawnBotBet, 2000);
         }
 
         updateGameState();
@@ -210,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
             } else {
                 clearInterval(timerInterval);
+                if (botInterval) clearInterval(botInterval);
                 spinWheel();
             }
         }, 1000);
@@ -252,14 +258,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             timerDisplay.textContent = "WINNER!";
             timerDisplay.style.color = "#10b981";
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 
             if (winner.name === '@you') {
                 myBalance += finalPayout;
                 updateBalanceUI();
-                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 window.Telegram.WebApp.showAlert(`ВЫ ВЫИГРАЛИ! 🎉 +${finalPayout.toFixed(2)} USDT`);
             } else {
-                window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 window.Telegram.WebApp.showAlert(`Выиграл ${winner.name}. Повезет в следующий раз!`);
             }
 
@@ -272,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         roundTime = 120;
         isSpinning = false;
         timerStarted = false;
+        if (botInterval) clearInterval(botInterval);
         wheelElement.style.transition = "none";
         wheelElement.style.transform = "rotate(-90deg)";
         timerDisplay.textContent = "--:--";
