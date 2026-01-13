@@ -12,12 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const betBtn = document.getElementById('place-custom-bet');
     const quickBtns = document.querySelectorAll('.quick-btn');
     const clearBtn = document.getElementById('clear-input');
-    const netBetDisplay = document.getElementById('net-bet-display');
     const userBalanceDisplay = document.getElementById('user-balance');
 
-    // Game State (LOCAL SYNC - Real data comes from DB later)
+    // Game State
     let players = [];
-    let myBalance = 100.00; // Mock balance for testing!
+    let myBalance = 100.00; // Mock balance
     let roundTime = 120;
     let isSpinning = false;
     let timerStarted = false;
@@ -28,15 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeCanvas();
         updateBalanceUI();
         updateGameState();
-
         window.Telegram.WebApp.expand();
-
-        // Listen to input changes for dynamic fee calculation
-        betInput.addEventListener('input', () => {
-            const val = parseFloat(betInput.value) || 0;
-            const net = val * 0.95;
-            netBetDisplay.textContent = net.toFixed(2);
-        });
     }
 
     function updateBalanceUI() {
@@ -128,8 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INTERACTION ---
     betBtn.addEventListener('click', () => {
         const val = parseFloat(betInput.value);
-        if (isNaN(val) || val <= 0) {
-            window.Telegram.WebApp.showAlert("Введите сумму!");
+        if (isNaN(val) || val < 0.1) {
+            window.Telegram.WebApp.showAlert("Min ставка 0.1 USDT");
             return;
         }
         if (val > myBalance) {
@@ -139,23 +130,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         placeBet(val);
         betInput.value = '';
-        netBetDisplay.textContent = '0.00';
     });
 
     quickBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            const current = parseFloat(betInput.value) || 0;
-            const extra = parseFloat(btn.dataset.amount);
-            betInput.value = (current + extra).toFixed(2);
-            // Trigger calculation
-            const net = (current + extra) * 0.95;
-            netBetDisplay.textContent = net.toFixed(2);
+            const cur = parseFloat(betInput.value) || 0;
+            betInput.value = (cur + parseFloat(btn.dataset.amount)).toFixed(2);
         });
     });
 
     clearBtn.addEventListener('click', () => {
         betInput.value = '';
-        netBetDisplay.textContent = '0.00';
     });
 
     function placeBet(amount) {
@@ -164,16 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
         myBalance -= amount;
         updateBalanceUI();
 
-        const commission = amount * 0.05;
-        const netAmount = amount - commission;
-
+        // 100% of bet goes to pot now!
         const myIndex = players.findIndex(p => p.name === '@you');
         if (myIndex >= 0) {
-            players[myIndex].bet += netAmount;
+            players[myIndex].bet += amount;
         } else {
             players.push({
                 name: '@you',
-                bet: netAmount,
+                bet: amount,
                 color: '#10b981'
             });
         }
@@ -231,17 +214,23 @@ document.addEventListener('DOMContentLoaded', () => {
         wheelElement.style.transform = `rotate(${targetRot}deg)`;
 
         setTimeout(() => {
+            // CALCULATE FAIR PRIZE
+            // Winner gets: Their Bet + (Remaining Pot * 95%)
+            const othersMoney = total - winner.bet;
+            const houseFee = othersMoney * 0.05;
+            const netWin = othersMoney - houseFee;
+            const finalPayout = winner.bet + netWin;
+
             timerDisplay.textContent = "WINNER!";
             timerDisplay.style.color = "#10b981";
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
 
             if (winner.name === '@you') {
-                myBalance += (getTotalPot()); // Pot is already net amount!
+                myBalance += finalPayout;
                 updateBalanceUI();
-                window.Telegram.WebApp.showAlert(`Вы выиграли ${getTotalPot().toFixed(2)} USDT!`);
+                window.Telegram.WebApp.showAlert(`Вы выиграли ${finalPayout.toFixed(2)} USDT! (Налог: ${houseFee.toFixed(2)})`);
             }
 
-            // Auto Reset after 5s
             setTimeout(resetGame, 5000);
         }, 6500);
     }
