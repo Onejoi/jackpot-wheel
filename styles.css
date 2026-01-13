@@ -155,21 +155,6 @@ body {
     margin-left: 5px;
 }
 
-.debug-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #f43f5e;
-    color: white;
-    font-size: 10px;
-    font-weight: 900;
-    text-align: center;
-    padding: 2px;
-    z-index: 9999;
-    text-transform: uppercase;
-}
-
 .bet-btn-main {
     background: #10b981;
     color: #fff;
@@ -228,6 +213,12 @@ body {
 }
 
 /* Players List */
+.players-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #18191c;
+}
+
 .list-header {
     padding: 10px 20px;
     background: #1c1d22;
@@ -241,14 +232,14 @@ body {
 .player-row {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 12px 20px;
     border-bottom: 1px solid #2a2d35;
     animation: slideIn 0.3s ease-out;
 }
 
 .player-color {
-    width: 4px;
-    height: 30px;
+    width: 12px;
+    height: 12px;
     border-radius: 2px;
     margin-right: 12px;
 }
