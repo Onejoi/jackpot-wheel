@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const betInput = document.getElementById('custom-bet-input');
     const betBtn = document.getElementById('place-custom-bet');
     const userBalanceDisplay = document.getElementById('user-balance');
+    const depositBtn = document.getElementById('fake-deposit');
 
     let players = [];
     let myBalance = 100.00;
@@ -105,6 +106,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const cur = parseFloat(betInput.value) || 0;
             betInput.value = (cur + parseFloat(b.dataset.amount)).toFixed(2);
         });
+    });
+
+    depositBtn.addEventListener('click', () => {
+        const amount = prompt("СУММА ПОПОЛНЕНИЯ (TEST):", "100");
+        if (amount && !isNaN(parseFloat(amount))) {
+            const val = parseFloat(amount);
+            window.Telegram.WebApp.showConfirm(`ФЕЙК-ОПЛАТА: Вы пополняете на ${val.toFixed(2)} USDT. Тестовый режим.`, (ok) => {
+                if (ok) {
+                    myBalance += val;
+                    updateBalanceUI();
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+            });
+        }
     });
 
     function startRound() {
