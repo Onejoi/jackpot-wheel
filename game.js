@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Пытаемся стукнуться к боту (localhost для тестов на компе)
             // Если тестишь с телефона - замени на свой IP или ngrok ссылку
-            const API_URL = "http://localhost:5000/api/win";
+            const API_URL = "http://192.168.1.11:5000/api/win";
             await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
