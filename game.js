@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let players = [];
 
-    // ЦЕНТРАЛЬНЫЙ АДРЕС БОТА (Меняй здесь на ngrok если нужно)
-    const BOT_API_URL = "http://192.168.1.11:5000";
+    // ЦЕНТРАЛЬНЫЙ АДРЕС БОТА (Railway Production)
+    const BOT_API_URL = "https://jackpot-wheel-production.up.railway.app";
 
     const params = new URLSearchParams(window.location.search);
     const bParam = params.get('balance');
