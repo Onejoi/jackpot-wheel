@@ -64,13 +64,16 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 @dp.message(Command("start"))
-async def start(message: types.Message):
-    user_id = message.from_user.id
+async def start(message: types.Message, user: types.User = None):
+    # Если зашли через команду — берем юзера из сообщения.
+    # Если позвали из колбэка — используем переданного юзера.
+    tgt_user = user if user else message.from_user
+    user_id = tgt_user.id
     balance = get_user_balance(user_id)
     
     text = (
         f"🎰 <b>JACKPOT WHEEL</b>\n\n"
-        f"👤 Игрок: <b>{message.from_user.full_name}</b>\n"
+        f"👤 Игрок: <b>{tgt_user.full_name}</b>\n"
         f"💰 Баланс: <b>{balance:.2f} USDT</b>\n\n"
         f"⚖️ <i>Комиссия вывода: 0%\nКомиссия игры: 5% (в банк раунда)</i>\n\n"
         f"👇 Нажимай кнопку, чтобы играть!"
@@ -106,7 +109,7 @@ async def process_buy(call: CallbackQuery):
     amount = float(call.data.split("_")[1])
     update_user_balance(call.from_user.id, amount, call.from_user.username)
     await call.answer(f"✅ Баланс пополнен на {amount} USDT!", show_alert=True)
-    await start(call.message) # Обновляем главное меню
+    await start(call.message, user=call.from_user) # Передаем ПРАВИЛЬНОГО юзера
 
 @dp.callback_query(F.data == "withdraw_menu")
 async def withdraw_menu(call: CallbackQuery):
@@ -132,11 +135,11 @@ async def fake_withdraw(call: CallbackQuery):
     else:
         update_user_balance(call.from_user.id, -balance, call.from_user.username)
         await call.answer(f"✅ Заявка на {balance} USDT принята!\nОжидайте выплату.", show_alert=True)
-        await start(call.message)
+        await start(call.message, user=call.from_user)
 
 @dp.callback_query(F.data == "back_to_start")
 async def back_to_start(call: CallbackQuery):
-    await start(call.message)
+    await start(call.message, user=call.from_user)
 
 @dp.message(Command("fake_pay"))
 async def fake_pay_cmd(message: types.Message):

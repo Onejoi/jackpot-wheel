@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let players = [];
 
+    // ЦЕНТРАЛЬНЫЙ АДРЕС БОТА (Меняй здесь на ngrok если нужно)
+    const BOT_API_URL = "http://192.168.1.11:5000";
+
     const params = new URLSearchParams(window.location.search);
     const bParam = params.get('balance');
     const uParam = params.get('user_id'); // Берем ID юзера из ссылки
@@ -51,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function syncBalance() {
         if (!uParam) return;
         try {
-            const API_URL = `http://192.168.1.11:5000/api/balance?user_id=${uParam}`;
+            const API_URL = `${BOT_API_URL}/api/balance?user_id=${uParam}`;
             const res = await fetch(API_URL);
             const data = await res.json();
             if (data.balance !== undefined) {
@@ -236,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function notifyBotOfWin(userId, amount, fee) {
         if (!userId) return;
         try {
-            const API_URL = "http://192.168.1.11:5000/api/win";
+            const API_URL = `${BOT_API_URL}/api/win`;
             await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -251,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function notifyBotOfBet(userId, amount) {
         if (!userId) return true;
         try {
-            const API_URL = "http://192.168.1.11:5000/api/bet";
+            const API_URL = `${BOT_API_URL}/api/bet`;
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
