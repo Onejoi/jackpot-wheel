@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.balance !== undefined) {
                 myBalance = data.balance;
                 updateBalanceUI();
+                console.log("Balance synced with Bot API:", myBalance);
+                // Показываем маленькую подсказку, что данные подтянулись
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
         } catch (e) {
             console.error("Balance sync failed. Bot down?");
