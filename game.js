@@ -126,10 +126,19 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
-    betBtn.addEventListener('click', () => {
+    betBtn.addEventListener('click', async () => {
         const val = parseFloat(betInput.value);
         if (val >= 0.1 && val <= myBalance) {
-            myBalance -= val; updateBalanceUI(); handleNewBet(val, '@you', '#10b981');
+            // Сначала уведомляем бота о ставке, чтобы он вычел из БД
+            const ok = await notifyBotOfBet(uParam, val);
+            if (!ok) {
+                window.Telegram.WebApp.showAlert("❌ Ошибка связи с ботом. Ставка не принята.");
+                return;
+            }
+
+            myBalance -= val;
+            updateBalanceUI();
+            handleNewBet(val, '@you', '#10b981');
             betInput.value = '';
         }
     });
@@ -223,16 +232,31 @@ document.addEventListener('DOMContentLoaded', () => {
     async function notifyBotOfWin(userId, amount, fee) {
         if (!userId) return;
         try {
-            // Пытаемся стукнуться к боту (localhost для тестов на компе)
-            // Если тестишь с телефона - замени на свой IP или ngrok ссылку
             const API_URL = "http://192.168.1.11:5000/api/win";
             await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_id: userId, amount: amount, fee: fee })
             });
+            console.log("Win notified successfully");
         } catch (e) {
-            console.error("Failed to notify bot. Make sure bot.py is running and accessible.", e);
+            console.error("Win sync failed:", e);
+        }
+    }
+
+    async function notifyBotOfBet(userId, amount) {
+        if (!userId) return true;
+        try {
+            const API_URL = "http://192.168.1.11:5000/api/bet";
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, amount: amount })
+            });
+            return res.ok;
+        } catch (e) {
+            console.error("Bet sync failed:", e);
+            return false;
         }
     }
 

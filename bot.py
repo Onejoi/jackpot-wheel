@@ -181,18 +181,41 @@ async def admin_panel(message: types.Message):
     admin_profit = cursor.fetchone()[0] or 0.0
     conn.close()
     
-# ---------------------------------------------
-# API SERVER (Receive wins from Mini App)
-# ---------------------------------------------
+async def get_balance_handler(request):
+    uid = request.query.get("user_id")
+    if not uid:
+        return web.json_response({"error": "no user_id"}, status=400)
+    
+    balance = get_user_balance(int(uid))
+    logging.info(f"API: GET balance for {uid} -> {balance}")
+    return web.json_response({"balance": balance})
+
+async def handle_bet(request):
+    data = await request.json()
+    uid = data.get("user_id")
+    amount = data.get("amount")
+
+    if not uid or amount is None:
+        return web.Response(text="Invalid data", status=400)
+
+    # Вычитаем ставку из БД сразу
+    update_user_balance(uid, -amount)
+    new_balance = get_user_balance(uid)
+    
+    logging.info(f"API: BET from {uid}: -{amount} USDT. Actual balance: {new_balance}")
+    return web.json_response({"status": "ok", "new_balance": new_balance})
+
 async def handle_win(request):
     data = await request.json()
     uid = data.get("user_id")
     win_amount = data.get("amount")
-    profit_fee = data.get("fee", 0) # 5% комиссии админа
+    profit_fee = data.get("fee", 0) 
 
     if not uid or win_amount is None:
         return web.Response(text="Invalid data", status=400)
 
+    logging.info(f"API: WIN for {uid}: +{win_amount} USDT")
+    
     # 1. Обновляем баланс игрока в БД
     update_user_balance(uid, win_amount)
     
@@ -244,6 +267,9 @@ async def run_api():
     
     bal_res = app.router.add_resource("/api/balance")
     cors.add(bal_res.add_route("GET", get_balance_handler))
+
+    bet_res = app.router.add_resource("/api/bet")
+    cors.add(bet_res.add_route("POST", handle_bet))
     
     runner = web.AppRunner(app)
     await runner.setup()
