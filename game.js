@@ -8,10 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const betInput = document.getElementById('custom-bet-input');
     const betBtn = document.getElementById('place-custom-bet');
     const userBalanceDisplay = document.getElementById('user-balance');
-    const depositBtn = document.getElementById('fake-deposit');
-    const modal = document.getElementById('deposit-modal');
-    const closeModal = document.getElementById('close-modal');
-    const amountBtns = document.querySelectorAll('.amount-btn');
 
     let players = [];
 
@@ -124,23 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- DEPOSIT MODAL LOGIC ---
-    depositBtn.addEventListener('click', () => { modal.style.display = 'flex'; });
-    closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
 
-    amountBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = parseFloat(btn.dataset.val);
-            window.Telegram.WebApp.showConfirm(`ФЕЙК-ОПЛАТА: Вы пополняете на ${val}$ для теста.`, (ok) => {
-                if (ok) {
-                    myBalance += val;
-                    updateBalanceUI();
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                    modal.style.display = 'none';
-                }
-            });
-        });
-    });
 
     function startRound() {
         timerInterval = setInterval(() => {

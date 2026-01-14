@@ -185,9 +185,7 @@ body {
 }
 
 .user-balance-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
     background: #18191c;
     border: 1px dashed #343740;
     border-radius: 8px;
@@ -197,24 +195,7 @@ body {
     color: #fbbf24;
 }
 
-.deposit-btn {
-    background: #10b981;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
-    font-weight: 900;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-}
 
-.deposit-btn:active {
-    transform: scale(0.9);
-}
 
 .quick-btn {
     flex: 1;
