@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const params = new URLSearchParams(window.location.search);
     const bParam = params.get('balance');
+    const uParam = params.get('user_id'); // Берем ID юзера из ссылки
     let myBalance = 100.00;
 
     if (bParam !== null) {
@@ -163,15 +164,41 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        setTimeout(() => {
+        setTimeout(async () => {
             const netWin = (total - winner.bet) * 0.95;
+            const fee = (total - winner.bet) * 0.05;
             const payout = winner.bet + netWin;
+
             timerDisplay.textContent = "WINNER!";
             timerDisplay.style.color = "#10b981";
+
             window.Telegram.WebApp.showAlert(`ПОБЕДИТЕЛЬ: ${winner.name}\nВыигрыш: ${payout.toFixed(2)} USDT`);
-            if (winner.name === '@you') { myBalance += payout; updateBalanceUI(); }
+
+            if (winner.name === '@you') {
+                myBalance += payout;
+                updateBalanceUI();
+                // УВЕДОМЛЯЕМ БОТА О ВЫИГРЫШЕ
+                await notifyBotOfWin(uParam, payout, fee);
+            }
+
             setTimeout(() => location.reload(), 3000);
         }, 6500);
+    }
+
+    async function notifyBotOfWin(userId, amount, fee) {
+        if (!userId) return;
+        try {
+            // Пытаемся стукнуться к боту (localhost для тестов на компе)
+            // Если тестишь с телефона - замени на свой IP или ngrok ссылку
+            const API_URL = "http://localhost:5000/api/win";
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, amount: amount, fee: fee })
+            });
+        } catch (e) {
+            console.error("Failed to notify bot. Make sure bot.py is running and accessible.", e);
+        }
     }
 
     init();
