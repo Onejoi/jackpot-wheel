@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timerStarted = false;
         timerDisplay.textContent = "--:--";
         timerDisplay.style.color = "#ef4444";
+        timerDisplay.style.fontSize = ""; // Возвращаем компактный размер из CSS
         potDisplay.textContent = "0.00";
         wheelWrapper.style.transition = "none";
         wheelWrapper.style.transform = "rotate(-90deg)";
