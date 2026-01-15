@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #111;
+    background-color: #0d0e12;
     color: #fff;
     height: 100vh;
     overflow: hidden;
@@ -20,7 +20,7 @@ body {
     height: 100%;
     max-width: 600px;
     margin: 0 auto;
-    background: #18191c;
+    background: #0d0e12;
 }
 
 /* Wheel Section */
@@ -31,7 +31,7 @@ body {
     align-items: center;
     position: relative;
     padding: 20px;
-    background: radial-gradient(circle at center, #2a2d35 0%, #18191c 70%);
+    background: radial-gradient(circle at center, #1a1c22 0%, #0d0e12 80%);
 }
 
 .wheel-container {
@@ -53,7 +53,7 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 .wheel-pointer {
@@ -66,7 +66,7 @@ body {
     background: #fff;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
     z-index: 10;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 0 8px #fff);
 }
 
 .wheel-center {
@@ -76,28 +76,30 @@ body {
     transform: translate(-50%, -50%);
     width: 140px;
     height: 140px;
-    background: #18191c;
+    background: #0d0e12;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 5;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    border: 4px solid #2a2d35;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .timer {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 800;
-    color: #ef4444;
+    color: #ff2e2e;
+    text-shadow: 0 0 10px #ff2e2e, 0 0 20px rgba(255, 46, 46, 0.5);
 }
 
 .pot-total {
     font-size: 16px;
-    color: #10b981;
-    font-weight: 600;
+    color: #00ffaa;
+    font-weight: 800;
     margin-top: 5px;
+    text-shadow: 0 0 8px #00ffaa;
 }
 
 /* Betting Panel */
@@ -162,20 +164,22 @@ body {
 }
 
 .bet-btn-main {
-    background: #10b981;
-    color: #fff;
+    background: #00ffaa;
+    color: #0d0e12;
     border: none;
     border-radius: 8px;
     padding: 0 25px;
     font-weight: 800;
     text-transform: uppercase;
     cursor: pointer;
-    transition: transform 0.1s, background 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
 }
 
 .bet-btn-main:active {
     transform: scale(0.95);
-    background: #059669;
+    background: #00cc88;
+    box-shadow: 0 0 5px rgba(0, 255, 170, 0.8);
 }
 
 .bet-actions-quick {
@@ -189,13 +193,15 @@ body {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    background: #18191c;
-    border: 1px dashed #343740;
+    background: #13141a;
+    border: 1px solid rgba(251, 191, 36, 0.3);
     border-radius: 8px;
     padding: 10px 15px;
     font-size: 13px;
     font-weight: 800;
     color: #fbbf24;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.1);
+    text-shadow: 0 0 5px #fbbf24;
 }
 
 .status-dot {
@@ -221,18 +227,20 @@ body {
 .quick-btn {
     flex: 1;
     padding: 10px;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 6px;
-    background: #343740;
+    background: #1a1c22;
     color: #9ca3af;
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .quick-btn:active {
-    background: #4b5563;
+    background: #2a2d35;
     color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 #clear-input {

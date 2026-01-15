@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let botInterval = null;
 
     const botPool = [
-        { name: '@crypto_king', color: '#6366f1' },
-        { name: '@ton_master', color: '#a855f7' },
-        { name: '@lucky_guy', color: '#ec4899' },
-        { name: '@whale_🐋', color: '#f43f5e' },
-        { name: '@degen_1337', color: '#ef4444' }
+        { name: '@crypto_king', color: '#00fbff' }, // Neon Cyan
+        { name: '@ton_master', color: '#ff00ff' }, // Neon Pink
+        { name: '@lucky_guy', color: '#39ff14' },   // Neon Green
+        { name: '@whale_🐋', color: '#fff200' },    // Neon Yellow
+        { name: '@degen_1337', color: '#ff5f1f' }   // Neon Orange
     ];
 
     async function init() {
@@ -108,18 +108,52 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawWheel(total) {
         ctx.clearRect(0, 0, 300, 300);
         let start = 0;
+
+        // Рисуем свечение под колесом
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "rgba(255, 255, 255, 0.1)";
+
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
-            ctx.beginPath(); ctx.moveTo(150, 150); ctx.arc(150, 150, 150, start, start + slice); ctx.closePath();
-            ctx.fillStyle = p.color; ctx.fill();
-            ctx.strokeStyle = '#18191c'; ctx.lineWidth = 1; ctx.stroke();
+
+            // Основной сектор
+            ctx.beginPath();
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 148, start, start + slice);
+            ctx.closePath();
+
+            ctx.shadowBlur = 0; // Отключаем тень для заливки, чтобы не мылило
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = 0.8; // Делаем чуть прозрачным для "стеклянного" эффекта
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // Неоновая тонкая граница
+            ctx.beginPath();
+            ctx.arc(150, 150, 148, start, start + slice);
+            ctx.strokeStyle = '#fff'; // Яркая белая сердцевина неона
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = p.color; // Цветное свечение неона
+            ctx.stroke();
+
             start += slice;
         });
+
+        // Сбрасываем тени
+        ctx.shadowBlur = 0;
     }
 
     function drawEmptyWheel() {
-        ctx.clearRect(0, 0, 300, 300); ctx.beginPath(); ctx.arc(150, 150, 150, 0, Math.PI * 2);
-        ctx.fillStyle = '#2a2d35'; ctx.fill();
+        ctx.clearRect(0, 0, 300, 300);
+        ctx.beginPath();
+        ctx.arc(150, 150, 148, 0, Math.PI * 2);
+        ctx.fillStyle = '#13141a';
+        ctx.fill();
+
+        ctx.strokeStyle = '#2a2d35';
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
 
     function renderList(total) {
