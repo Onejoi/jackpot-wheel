@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let botInterval = null;
 
     const botPool = [
-        { name: '@cyber_ghost', color: '#00d4ff' }, // Electric Blue
-        { name: '@neon_viper', color: '#ff007f' }, // Deep Rose
-        { name: '@glitch_king', color: '#39ff14' }, // Alien Green
-        { name: '@bolt_⚡', color: '#ffea00' },     // Lightning Yellow
-        { name: '@phantom_X', color: '#9d00ff' }   // Cyber Purple
+        { name: '@cyber_ghost', color: '#00e5ff' }, // Electric Cyan
+        { name: '@neon_heart', color: '#ff00ff' }, // Vivid Magenta
+        { name: '@luck_star', color: '#39ff14' },  // Neon Lime
+        { name: '@gold_king', color: '#ffcc00' },  // Bright Gold
+        { name: '@void_walker', color: '#bc13fe' } // Electric Purple
     ];
 
     async function init() {
@@ -109,63 +109,51 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, 300, 300);
         let start = 0;
 
-        // Рисуем свечение под колесом
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "rgba(255, 255, 255, 0.1)";
-
+        // 1. Рисуем цветовые сектора
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
-
             ctx.beginPath();
             ctx.moveTo(150, 150);
             ctx.arc(150, 150, 148, start, start + slice);
             ctx.closePath();
 
-            // 1. Рисуем ГРАДИЕНТНЫЙ сектор (Глубина)
-            const grad = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-            grad.addColorStop(0, p.color);
-            grad.addColorStop(1, adjustColor(p.color, -40)); // Затемняем к краям
-
-            ctx.beginPath();
-            ctx.moveTo(150, 150);
-            ctx.arc(150, 150, 148, start, start + slice);
-            ctx.closePath();
-
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = grad;
+            ctx.fillStyle = p.color;
             ctx.fill();
 
-            // 2. Рисуем "СТЕКЛЯННЫЙ БЛИК" (как на аве)
-            ctx.save();
-            ctx.clip(); // Чтобы блик не вылезал за фланец
-            ctx.beginPath();
-            ctx.arc(150, 150, 148, start, start + slice);
-            const shine = ctx.createLinearGradient(150, 0, 150, 300);
-            shine.addColorStop(0, "rgba(255, 255, 255, 0.4)"); // Свет сверху
-            shine.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
-            shine.addColorStop(1, "rgba(0, 0, 0, 0.1)");
-            ctx.fillStyle = shine;
-            ctx.fill();
-            ctx.restore();
-
-            // 3. Неоновая тонкая граница (Свечение)
-            ctx.beginPath();
-            ctx.arc(150, 150, 148, start, start + slice);
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 1.5;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = p.color;
-            ctx.stroke();
-
-            // 4. Тонкий финальный контур для четкости
-            ctx.shadowBlur = 2;
-            ctx.lineWidth = 0.5;
+            // Тонкий внутренний разделитель
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
             ctx.stroke();
 
             start += slice;
         });
 
+        // 2. ГЛОБАЛЬНЫЙ НЕОНОВЫЙ КОНТУР (поверх всех секторов)
+        start = 0;
+        players.forEach(p => {
+            const slice = (p.bet / total) * 2 * Math.PI;
+            ctx.beginPath();
+            ctx.arc(150, 150, 148, start, start + slice);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = p.color;
+            ctx.stroke();
+            start += slice;
+        });
+
         ctx.shadowBlur = 0;
+
+        // 3. ГЛОБАЛЬНЫЙ СТЕКЛЯННЫЙ БЛИК (на всё колесо сразу)
+        ctx.beginPath();
+        ctx.arc(150, 150, 148, 0, Math.PI * 2);
+        const shine = ctx.createLinearGradient(0, 0, 0, 300);
+        shine.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+        shine.addColorStop(0.4, "rgba(255, 255, 255, 0.1)");
+        shine.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
+        shine.addColorStop(1, "rgba(0, 0, 0, 0.2)");
+        ctx.fillStyle = shine;
+        ctx.fill();
     }
 
     // Хелпер для затемнения цветов для градиента
@@ -278,8 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const fee = (total - winner.bet) * 0.05;
             const payout = winner.bet + netWin;
 
-            timerDisplay.textContent = "WINNER!";
-            timerDisplay.style.color = "#10b981";
+            timerDisplay.textContent = "Winner!";
+            timerDisplay.style.fontSize = "18px"; // Делаем меньше, чтобы не вылетало
+            timerDisplay.style.color = "#00ffaa";
 
             window.Telegram.WebApp.showAlert(`ПОБЕДИТЕЛЬ: ${winner.name}\nВыигрыш: ${payout.toFixed(2)} USDT`);
 
