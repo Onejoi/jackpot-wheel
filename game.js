@@ -136,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 3. Яркая неоновая нить (белая сердцевина)
             ctx.globalAlpha = 1.0;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 8;
             ctx.strokeStyle = "#fff";
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1; // Делаем края тоньше (было 2)
             ctx.stroke();
 
             // Отрисовка боковых "спиц" ячейки
