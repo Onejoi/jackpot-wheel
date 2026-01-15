@@ -88,12 +88,8 @@ async def start(message: types.Message, user: types.User = None):
         [InlineKeyboardButton(text="📤 ВЫВЕСТИ", callback_data="withdraw_menu")]
     ])
     
-    # Пытаемся отправить фото, если оно есть
-    if os.path.exists("logo.png"):
-        photo = FSInputFile("logo.png")
-        await message.answer_photo(photo, caption=text, reply_markup=keyboard, parse_mode="HTML")
-    else:
-        await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+    # Отправляем обычный текст без фото
+    await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
 
 @dp.callback_query(F.data == "deposit_menu")
 async def deposit_menu(call: CallbackQuery):
