@@ -287,20 +287,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const fee = (total - winner.bet) * 0.05;
             const payout = winner.bet + netWin;
 
+            // В центре пишем кто победил
             timerDisplay.textContent = "Winner!";
-            timerDisplay.style.fontSize = "20px"; // Увеличиваем под новый масштаб
+            timerDisplay.style.fontSize = "20px";
             timerDisplay.style.color = "#00ffaa";
 
-            window.Telegram.WebApp.showAlert(`ПОБЕДИТЕЛЬ: ${winner.name}\nВыигрыш: ${payout.toFixed(2)} USDT`);
+            // Вместо суммы банка пишем имя (компактно)
+            potDisplay.textContent = winner.name;
+            potDisplay.style.fontSize = winner.name.length > 10 ? "14px" : "18px";
 
+            // Уведомление ТОЛЬКО если выиграл я
             if (winner.name === '@you') {
+                window.Telegram.WebApp.showAlert(`🚀 ПОБЕДА! Вы выиграли ${payout.toFixed(2)} USDT`);
                 myBalance += payout;
                 updateBalanceUI();
                 // УВЕДОМЛЯЕМ БОТА О ВЫИГРЫШЕ
                 await notifyBotOfWin(uParam, payout, fee);
             }
 
-            // Просто сбрасываем раунд, деньги остаются в памяти
+            // Ровно через 3 секунды сбрасываем раунд для новой игры
             setTimeout(() => resetGame(), 3000);
         }, 6500);
     }
@@ -314,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay.style.color = "#ef4444";
         timerDisplay.style.fontSize = ""; // Возвращаем компактный размер из CSS
         potDisplay.textContent = "0.00";
+        potDisplay.style.fontSize = ""; // Сбрасываем размер после имени победителя
         wheelWrapper.style.transition = "none";
         wheelWrapper.style.transform = "rotate(-90deg)";
         updateGameState();
