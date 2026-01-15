@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payout = winner.bet + netWin;
 
             timerDisplay.textContent = "Winner!";
-            timerDisplay.style.fontSize = "16px"; // Еще чуть меньше
+            timerDisplay.style.fontSize = "20px"; // Увеличиваем под новый масштаб
             timerDisplay.style.color = "#00ffaa";
 
             window.Telegram.WebApp.showAlert(`ПОБЕДИТЕЛЬ: ${winner.name}\nВыигрыш: ${payout.toFixed(2)} USDT`);
