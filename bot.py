@@ -5,7 +5,7 @@ import sqlite3
 import os
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, FSInputFile
 from aiohttp import web
 import aiohttp_cors
 import json
@@ -73,11 +73,10 @@ async def start(message: types.Message, user: types.User = None):
     balance = get_user_balance(user_id)
     
     text = (
-        f"🎰 <b>JACKPOT WHEEL</b>\n\n"
+        f"🎰 <b>JACKPOT WHEEL</b> — Крути колесо и забирай банк! 🚀🔥\n\n"
         f"👤 Игрок: <b>{tgt_user.full_name}</b>\n"
         f"💰 Баланс: <b>{balance:.2f} USDT</b>\n\n"
-        f"⚖️ <i>Комиссия вывода: 0%\nКомиссия игры: 5% (в банк раунда)</i>\n\n"
-        f"👇 Нажимай кнопку, чтобы играть!"
+        f"⚖️ <i>Комиссия вывода: 0%\nКомиссия игры: 5% (в банк раунда)</i>"
     )
     
     # Передаем реальный баланс в URL для Mini App
@@ -89,7 +88,12 @@ async def start(message: types.Message, user: types.User = None):
         [InlineKeyboardButton(text="📤 ВЫВЕСТИ", callback_data="withdraw_menu")]
     ])
     
-    await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+    # Пытаемся отправить фото, если оно есть
+    if os.path.exists("logo.png"):
+        photo = FSInputFile("logo.png")
+        await message.answer_photo(photo, caption=text, reply_markup=keyboard, parse_mode="HTML")
+    else:
+        await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
 
 @dp.callback_query(F.data == "deposit_menu")
 async def deposit_menu(call: CallbackQuery):
