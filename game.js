@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let botInterval = null;
 
     const botPool = [
-        { name: '@crypto_king', color: '#00fbff' }, // Electric Cyan
-        { name: '@ton_master', color: '#ff00ff' }, // Magenta
-        { name: '@lucky_guy', color: '#bfff00' },   // Toxic Green
-        { name: '@whale_🐋', color: '#ffff00' },    // Pure Yellow
-        { name: '@degen_1337', color: '#ff6b00' }   // Bright Orange
+        { name: '@cyber_ghost', color: '#00d4ff' }, // Electric Blue
+        { name: '@neon_viper', color: '#ff007f' }, // Deep Rose
+        { name: '@glitch_king', color: '#39ff14' }, // Alien Green
+        { name: '@bolt_⚡', color: '#ffea00' },     // Lightning Yellow
+        { name: '@phantom_X', color: '#9d00ff' }   // Cyber Purple
     ];
 
     async function init() {
@@ -116,37 +116,70 @@ document.addEventListener('DOMContentLoaded', () => {
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
 
-            // Основной сектор
             ctx.beginPath();
             ctx.moveTo(150, 150);
             ctx.arc(150, 150, 148, start, start + slice);
             ctx.closePath();
 
-            ctx.shadowBlur = 0; // Отключаем тень для заливки, чтобы не мылило
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.9; // Делаем почти непрозрачным для яркости
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
+            // 1. Рисуем ГРАДИЕНТНЫЙ сектор (Глубина)
+            const grad = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+            grad.addColorStop(0, p.color);
+            grad.addColorStop(1, adjustColor(p.color, -40)); // Затемняем к краям
 
-            // Неоновая тонкая граница
+            ctx.beginPath();
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 148, start, start + slice);
+            ctx.closePath();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // 2. Рисуем "СТЕКЛЯННЫЙ БЛИК" (как на аве)
+            ctx.save();
+            ctx.clip(); // Чтобы блик не вылезал за фланец
             ctx.beginPath();
             ctx.arc(150, 150, 148, start, start + slice);
-            ctx.strokeStyle = '#fff'; // Яркая белая сердцевина неона
+            const shine = ctx.createLinearGradient(150, 0, 150, 300);
+            shine.addColorStop(0, "rgba(255, 255, 255, 0.4)"); // Свет сверху
+            shine.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
+            shine.addColorStop(1, "rgba(0, 0, 0, 0.1)");
+            ctx.fillStyle = shine;
+            ctx.fill();
+            ctx.restore();
+
+            // 3. Неоновая тонкая граница (Свечение)
+            ctx.beginPath();
+            ctx.arc(150, 150, 148, start, start + slice);
+            ctx.strokeStyle = '#fff';
             ctx.lineWidth = 1.5;
-            ctx.shadowBlur = 15; // Больше свечения
-            ctx.shadowColor = p.color; // Цветное свечение неона
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = p.color;
             ctx.stroke();
 
-            // Дополнительный тонкий контур для эффекта "сияния"
-            ctx.lineWidth = 0.5;
+            // 4. Тонкий финальный контур для четкости
             ctx.shadowBlur = 2;
+            ctx.lineWidth = 0.5;
             ctx.stroke();
 
             start += slice;
         });
 
-        // Сбрасываем тени
         ctx.shadowBlur = 0;
+    }
+
+    // Хелпер для затемнения цветов для градиента
+    function adjustColor(hex, amt) {
+        let usePound = false;
+        if (hex[0] == "#") { hex = hex.slice(1); usePound = true; }
+        let num = parseInt(hex, 16);
+        let r = (num >> 16) + amt;
+        if (r > 255) r = 255; else if (r < 0) r = 0;
+        let b = ((num >> 8) & 0x00FF) + amt;
+        if (b > 255) b = 255; else if (b < 0) b = 0;
+        let g = (num & 0x0000FF) + amt;
+        if (g > 255) g = 255; else if (g < 0) g = 0;
+        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
     }
 
     function drawEmptyWheel() {
