@@ -17,7 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const params = new URLSearchParams(window.location.search);
     const bParam = params.get('balance');
-    const uParam = params.get('user_id'); // Берем ID юзера из ссылки
+    let uParam = params.get('user_id');
+
+    // Если в URL нет ID, берем его напрямую из Телеграма (очень важно для кнопки меню!)
+    if (!uParam && window.Telegram && window.Telegram.WebApp.initDataUnsafe.user) {
+        uParam = window.Telegram.WebApp.initDataUnsafe.user.id;
+        console.log("UserID loaded from WebApp API:", uParam);
+    }
+
     let myBalance = 100.00;
 
     if (bParam !== null) {
@@ -52,21 +59,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function syncBalance() {
-        if (!uParam) return;
+        if (!uParam) {
+            console.warn("No user_id found in URL or WebApp. Connection status will stay red.");
+            return;
+        }
+        console.log("Attempting to sync with Bot API:", BOT_API_URL);
         try {
             const API_URL = `${BOT_API_URL}/api/balance?user_id=${uParam}`;
             const res = await fetch(API_URL);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             if (data.balance !== undefined) {
                 myBalance = data.balance;
                 updateBalanceUI();
                 statusDot.classList.remove('disconnected');
                 statusDot.classList.add('connected');
-                console.log("Balance synced with Bot API:", myBalance);
+                console.log("✅ Connection Successful! Balance:", myBalance);
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
         } catch (e) {
-            console.error("Balance sync failed. Bot down?");
+            console.error("❌ API Connection Failed:", e.message);
+            console.error("Make sure your Bot is running at:", BOT_API_URL);
             statusDot.classList.remove('connected');
             statusDot.classList.add('disconnected');
         }
