@@ -97,8 +97,7 @@ body {
     background: #fff;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
     z-index: 10;
-    filter: drop-shadow(0 0 10px #00f2fe);
-    animation: pointerPulse 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 10px #fff);
 }
 
 @keyframes pointerPulse {
@@ -136,17 +135,17 @@ body {
 .timer {
     font-size: 26px;
     font-weight: 800;
-    color: #ff2e2e;
-    text-shadow: 0 0 10px #ff2e2e, 0 0 20px rgba(255, 46, 46, 0.5);
+    color: #FF0000;
+    text-shadow: 0 0 10px #FF0000, 0 0 20px rgba(255, 0, 0, 0.5);
     white-space: nowrap;
 }
 
 .pot-total {
     font-size: 26px;
-    color: #00ffaa;
+    color: #00FF00;
     font-weight: 800;
     margin-top: 5px;
-    text-shadow: 0 0 12px #00ffaa, 0 0 5px #fff;
+    text-shadow: 0 0 12px #00FF00, 0 0 5px #fff;
 }
 
 /* Betting Panel */

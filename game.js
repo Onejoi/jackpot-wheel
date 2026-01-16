@@ -267,9 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             else { clearInterval(timerInterval); clearInterval(botInterval); startSpinProcess(); }
         }, 1000);
+        let availableBots = [...botPool]; // Копия пула для уникальных ботов
         botInterval = setInterval(() => {
-            if (!isSpinning) {
-                const bot = botPool[Math.floor(Math.random() * botPool.length)];
+            if (!isSpinning && availableBots.length > 0) {
+                const idx = Math.floor(Math.random() * availableBots.length);
+                const bot = availableBots.splice(idx, 1)[0]; // Убираем бота из пула
                 handleNewBet(Math.floor(Math.random() * 15) + 5, bot.name, bot.color);
             }
         }, 2000); // БОТЫ СТАВЯТ КАЖДЫЕ 2 СЕКУНДЫ
