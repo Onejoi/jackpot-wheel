@@ -162,18 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = grad;
             ctx.fill();
 
-            // 2. ТОНКАЯ ГРАНИЦА ЦВЕТА ЯЧЕЙКИ (как просил)
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 1.5;
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = p.color;
+            // 2. ТЁМНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ СЕГМЕНТАМИ (для чёткости)
+            ctx.strokeStyle = '#0a0a0f'; // Почти чёрная линия
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 0;
 
-            // Сама дуга
-            ctx.beginPath();
-            ctx.arc(150, 150, 148, start, start + slice);
-            ctx.stroke();
-
-            // Боковые линии (спицы)
+            // Боковые линии (спицы) — разделители
             ctx.beginPath();
             ctx.moveTo(150, 150);
             const endX = 150 + 148 * Math.cos(start);
