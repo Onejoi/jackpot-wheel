@@ -161,8 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.arc(150, 150, 148, start, start + slice);
             ctx.closePath();
 
-            // ПЛОСКИЙ ЦВЕТ (без градиента)
-            ctx.fillStyle = p.color;
+            // ГРАДИЕНТ (элитный вид)
+            const grad = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
+            grad.addColorStop(0, "#fff");
+            grad.addColorStop(0.15, p.color);
+            grad.addColorStop(0.6, p.color);
+            grad.addColorStop(1, adjustColor(p.color, -120));
+
+            ctx.fillStyle = grad;
             ctx.fill();
 
             // 2. ТЁМНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ СЕГМЕНТАМИ (для чёткости)
@@ -272,12 +278,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
         let availableBots = [...botPool]; // Копия пула для уникальных ботов
         botInterval = setInterval(() => {
-            if (!isSpinning && availableBots.length > 0) {
-                const idx = Math.floor(Math.random() * availableBots.length);
-                const bot = availableBots.splice(idx, 1)[0]; // Убираем бота из пула
-                handleNewBet(Math.floor(Math.random() * 15) + 5, bot.name, bot.color);
+            if (!isSpinning) {
+                // Сначала добавляем новых ботов, потом существующие докидывают
+                if (availableBots.length > 0) {
+                    const idx = Math.floor(Math.random() * availableBots.length);
+                    const bot = availableBots.splice(idx, 1)[0];
+                    handleNewBet(Math.floor(Math.random() * 15) + 5, bot.name, bot.color);
+                } else if (players.length > 0) {
+                    // Все боты в игре — случайный бот докидывает к своей ставке
+                    const existingBot = players[Math.floor(Math.random() * players.length)];
+                    if (existingBot.name !== myUsername) {
+                        handleNewBet(Math.floor(Math.random() * 10) + 3, existingBot.name, existingBot.color);
+                    }
+                }
             }
-        }, 2000); // БОТЫ СТАВЯТ КАЖДЫЕ 2 СЕКУНДЫ
+        }, 2000);
     }
 
     function startSpinProcess() {
