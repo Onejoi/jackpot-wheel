@@ -95,24 +95,21 @@ body {
     background: #fff;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
     z-index: 10;
-    box-shadow: 0 0 15px #fff, 0 0 30px #00f2fe;
     filter: drop-shadow(0 0 10px #00f2fe);
-    animation: pointerPulse 1.5s infinite ease-in-out;
+    animation: pointerPulse 2s infinite ease-in-out;
 }
 
 @keyframes pointerPulse {
 
     0%,
     100% {
-        transform: scaleY(1);
+        transform: translateX(-50%) scale(1);
         opacity: 0.8;
-        filter: brightness(1);
     }
 
     50% {
-        transform: scaleY(1.2);
+        transform: translateX(-50%) scale(1.1);
         opacity: 1;
-        filter: brightness(1.5);
     }
 }
 
