@@ -32,7 +32,6 @@ body {
     position: relative;
     padding: 20px;
     background: radial-gradient(circle at center, #1a1c22 0%, #08090b 100%);
-    overflow: hidden;
 }
 
 /* Subtle atmosphere pulse */
@@ -67,6 +66,7 @@ body {
     position: relative;
     width: 320px;
     height: 320px;
+    z-index: 2;
 }
 
 #wheel-spin-wrapper {
@@ -83,6 +83,8 @@ body {
     height: 100%;
     border-radius: 50%;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 255, 255, 0.05);
+    position: relative;
+    z-index: 1;
 }
 
 .wheel-pointer {
