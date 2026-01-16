@@ -44,16 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let botInterval = null;
 
     const botPool = [
-        { name: '@cyber_ghost', color: '#FF0000' }, { name: '@neon_heart', color: '#00FF00' },
-        { name: '@luck_star', color: '#0000FF' }, { name: '@gold_king', color: '#FFFF00' },
-        { name: '@void_walker', color: '#FF00FF' }, { name: '@hyper_drive', color: '#00FFFF' },
-        { name: '@quantum_bit', color: '#C000FF' }, { name: '@plasma_coil', color: '#8000FF' },
-        { name: '@nova_flare', color: '#FF0080' }, { name: '@glitch_fix', color: '#0080FF' },
-        { name: '@laser_beam', color: '#FF00C0' }, { name: '@acid_rain', color: '#C0FF00' },
-        { name: '@blaze_it', color: '#FF6000' }, { name: '@toxic_fog', color: '#00FF40' },
-        { name: '@aqua_glow', color: '#00FFC0' }, { name: '@sky_link', color: '#00C0FF' },
-        { name: '@ruby_eye', color: '#FF0060' }, { name: '@amber_wave', color: '#FFA000' },
-        { name: '@signal_lost', color: '#FF0040' }
+        { name: '@cyber_ghost', color: '#ff003c' }, { name: '@neon_heart', color: '#00ff41' },
+        { name: '@luck_star', color: '#0066ff' }, { name: '@gold_king', color: '#ffea00' },
+        { name: '@void_walker', color: '#be00ff' }, { name: '@hyper_drive', color: '#00facd' },
+        { name: '@quantum_bit', color: '#ff00d4' }, { name: '@plasma_coil', color: '#4500ff' },
+        { name: '@nova_flare', color: '#ff5a00' }, { name: '@glitch_fix', color: '#00c3ff' },
+        { name: '@laser_beam', color: '#ff0084' }, { name: '@acid_rain', color: '#9dff00' },
+        { name: '@blaze_it', color: '#ff8a00' }, { name: '@toxic_fog', color: '#00ff80' },
+        { name: '@aqua_glow', color: '#00e4ff' }, { name: '@sky_link', color: '#2a00ff' },
+        { name: '@ruby_eye', color: '#ff005a' }, { name: '@amber_wave', color: '#ffc600' },
+        { name: '@signal_lost', color: '#00ffbc' }, { name: '@neon_pulse', color: '#ff0024' }
     ];
 
     async function init() {
