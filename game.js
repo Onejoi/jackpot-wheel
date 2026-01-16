@@ -37,18 +37,23 @@ document.addEventListener('DOMContentLoaded', () => {
         myBalance = parseFloat(localStorage.getItem('test_balance')) || 100.00;
     }
 
-    let roundTime = 30;
+    let roundTime = 120; // 2 МИНУТЫ КД
     let isSpinning = false;
     let timerStarted = false;
     let timerInterval = null;
     let botInterval = null;
 
     const botPool = [
-        { name: '@cyber_ghost', color: '#00e5ff' }, // Electric Cyan
-        { name: '@neon_heart', color: '#ff00ff' }, // Vivid Magenta
-        { name: '@luck_star', color: '#39ff14' },  // Neon Lime
-        { name: '@gold_king', color: '#ffcc00' },  // Bright Gold
-        { name: '@void_walker', color: '#bc13fe' } // Electric Purple
+        { name: '@cyber_ghost', color: '#FF0000' }, { name: '@neon_heart', color: '#00FF00' },
+        { name: '@luck_star', color: '#0000FF' }, { name: '@gold_king', color: '#FFFF00' },
+        { name: '@void_walker', color: '#FF00FF' }, { name: '@hyper_drive', color: '#00FFFF' },
+        { name: '@quantum_bit', color: '#C000FF' }, { name: '@plasma_coil', color: '#8000FF' },
+        { name: '@nova_flare', color: '#FF0080' }, { name: '@glitch_fix', color: '#0080FF' },
+        { name: '@laser_beam', color: '#FF00C0' }, { name: '@acid_rain', color: '#C0FF00' },
+        { name: '@blaze_it', color: '#FF6000' }, { name: '@toxic_fog', color: '#00FF40' },
+        { name: '@aqua_glow', color: '#00FFC0' }, { name: '@sky_link', color: '#00C0FF' },
+        { name: '@ruby_eye', color: '#FF0060' }, { name: '@amber_wave', color: '#FFA000' },
+        { name: '@signal_lost', color: '#FF0040' }
     ];
 
     async function init() {
@@ -259,7 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startRound() {
         timerInterval = setInterval(() => {
-            if (roundTime > 0) { roundTime--; timerDisplay.textContent = `0:${roundTime < 10 ? '0' + roundTime : roundTime}`; }
+            if (roundTime > 0) {
+                roundTime--;
+                const mins = Math.floor(roundTime / 60);
+                const secs = roundTime % 60;
+                timerDisplay.textContent = `${mins}:${secs < 10 ? '0' + secs : secs}`;
+            }
             else { clearInterval(timerInterval); clearInterval(botInterval); startSpinProcess(); }
         }, 1000);
         botInterval = setInterval(() => {
@@ -267,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const bot = botPool[Math.floor(Math.random() * botPool.length)];
                 handleNewBet(Math.floor(Math.random() * 15) + 5, bot.name, bot.color);
             }
-        }, 3000);
+        }, 2000); // БОТЫ СТАВЯТ КАЖДЫЕ 2 СЕКУНДЫ
     }
 
     function startSpinProcess() {
@@ -332,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGame() {
         players = [];
-        roundTime = 30;
+        roundTime = 120; // ВОЗВРАЩАЕМ 2 МИНУТЫ
         isSpinning = false;
         timerStarted = false;
         timerDisplay.textContent = "--:--";
