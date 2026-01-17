@@ -188,7 +188,26 @@ body {
     border-color: #10b981;
 }
 
-/* .fee-info removed */
+.fee-info {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-bottom: 15px;
+    padding: 0 5px;
+}
+
+#net-bet-display {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.fee-tag {
+    font-size: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+}
 
 .bet-btn-main {
     background: #00ffaa;
@@ -253,17 +272,15 @@ body {
 
 .quick-btn {
     flex: 1;
-    padding: 8px 5px;
-    /* Compact padding */
+    padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 6px;
     background: #1a1c22;
     color: #9ca3af;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
-    white-space: nowrap;
 }
 
 .quick-btn:active {
@@ -272,10 +289,10 @@ body {
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-.clear-btn {
+#clear-input {
     background: #ef444422;
     color: #ef4444;
-    max-width: 40px;
+    max-width: 50px;
 }
 
 /* Players List */
@@ -423,3 +440,4 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
+.quick-btn { flex: 1; background: #2a2d35; color: #fff; border: none; border-radius: 6px; padding: 8px 5px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; } .quick-btn:active { transform: scale(0.95); background: #343740; }
