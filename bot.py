@@ -66,37 +66,66 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def start(message: types.Message, user: types.User = None):
-    # Если зашли через команду — берем юзера из сообщения.
-    # Если позвали из колбэка — используем переданного юзера.
     tgt_user = user if user else message.from_user
     user_id = tgt_user.id
     balance = get_user_balance(user_id)
     
     text = (
-        f"🎰 <b>JACKPOT WHEEL</b> — Крути колесо и забирай банк! 🚀🔥\n\n"
-        f"👤 Игрок: <b>{tgt_user.full_name}</b>\n"
-        f"💰 Баланс: <b>{balance:.2f} USDT</b>\n\n"
-        f"⚖️ <i>Комиссия вывода: 0%\nКомиссия игры: 5% (в банк раунда)</i>"
+        f"🎰 <b>JACKPOT WHEEL</b>\n\n"
+        f"Добро пожаловать, <b>{tgt_user.full_name}</b>! 🚀\n"
+        f"Твой баланс: <b>{balance:.2f} USDT</b>\n\n"
+        f"👇 Залетай в игру или изучи правила!"
     )
     
-    # Передаем реальный баланс в URL для Mini App
-    app_url = f"{WEBAPP_URL}?balance={balance}&user_id={user_id}"
+    app_url = f"{WEBAPP_URL}?balance={balance}&user_id={user_id}&username={tgt_user.username}"
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎲 ИГРАТЬ (НАЧАТЬ)", web_app=WebAppInfo(url=app_url))],
+        [InlineKeyboardButton(text="🎲 ИГРАТЬ", web_app=WebAppInfo(url=app_url))],
+        [InlineKeyboardButton(text="ℹ️ О ПРОЕКТЕ (ПРАВИЛА)", callback_data="info_project")],
         [InlineKeyboardButton(text="💎 ПОПОЛНИТЬ USDT", callback_data="deposit_menu")],
         [InlineKeyboardButton(text="📤 ВЫВЕСТИ", callback_data="withdraw_menu")]
     ])
     
-    # Отправляем обычный текст без фото
-    await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+    # Если это колбэк (например кнопка "Назад"), редактируем, иначе шлем новое
+    if user: 
+        if isinstance(message, types.Message):
+            await message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+        elif isinstance(message, types.CallbackQuery): # На всякий случай
+            await message.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+    else:
+        await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+
+@dp.callback_query(F.data == "info_project")
+async def info_project_handler(call: CallbackQuery):
+    text = (
+        "ℹ️ <b>О ПРОЕКТЕ</b>\n\n"
+        "🎮 <b>Механика игры:</b>\n"
+        "Чем больше твоя ставка — тем больше твой сектор на колесе и выше шанс победы! "
+        "Победитель забирает ВЕСЬ БАНК.\n\n"
+        "💸 <b>Комиссия и Налог:</b>\n"
+        "• <b>10%</b> — Комиссия игры (берется с общего выигрыша).\n"
+        "• Эта комиссия покрывает налоги платежных систем и развитие проекта.\n\n"
+        "⚡️ Выплаты автоматические и моментальные."
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔙 НАЗАД", callback_data="main_menu")]
+    ])
+    await call.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
+
+@dp.callback_query(F.data == "main_menu")
+async def back_to_main(call: CallbackQuery):
+    await start(call.message, user=call.from_user)
 
 @dp.callback_query(F.data == "deposit_menu")
 async def deposit_menu(call: CallbackQuery):
+    # Удаляем сообщение, если нужно (но лучше редактировать, как сейчас)
+    # Если хотим "чистый чат", можно удалять старое и слать новое, 
+    # но "edit_text" (как сейчас) — это самый аккуратный способ в Telegram.
+    # Оставим edit_text.
+    
     text = (
-        f"💎 <b>ПОПОЛНЕНИЕ USDT (TEST)</b>\n\n"
-        f"Выберите сумму для пополнения счета.\n"
-        f"<i>(Сейчас работает в режиме фейк-теста)</i>"
+        f"💎 <b>ПОПОЛНЕНИЕ USDT</b>\n\n"
+        f"Выберите сумму (Тестовый режим):"
     )
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="10 USDT", callback_data="buy_10"), InlineKeyboardButton(text="50 USDT", callback_data="buy_50")],
@@ -106,12 +135,34 @@ async def deposit_menu(call: CallbackQuery):
     ])
     await call.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
+@dp.callback_query(F.data == "back_to_start")
+async def back_to_main_alias(call: CallbackQuery):
+    await start(call.message, user=call.from_user)
+
 @dp.callback_query(F.data.startswith("buy_"))
 async def process_buy(call: CallbackQuery):
     amount = float(call.data.split("_")[1])
-    update_user_balance(call.from_user.id, amount, call.from_user.username)
-    await call.answer(f"✅ Баланс пополнен на {amount} USDT!", show_alert=True)
-    await start(call.message, user=call.from_user) # Передаем ПРАВИЛЬНОГО юзера
+    user_id = call.from_user.id
+    
+    # Эмуляция процессинга (чтобы игрок понял, что действие идет)
+    await call.message.edit_text("⏳ <b>Обработка транзакции...</b>", parse_mode="HTML")
+    await asyncio.sleep(1.0)
+    
+    update_user_balance(user_id, amount, call.from_user.username)
+    new_balance = get_user_balance(user_id)
+    
+    # Успех и авто-возврат
+    success_text = (
+        f"✅ <b>УСПЕШНО!</b>\n"
+        f"Зачислено: +{amount} USDT\n"
+        f"Текущий баланс: <b>{new_balance:.2f} USDT</b>"
+    )
+    
+    await call.message.edit_text(success_text, parse_mode="HTML")
+    await asyncio.sleep(2.0)
+    
+    # Возвращаем в главное меню
+    await start(call.message, user=call.from_user)
 
 @dp.callback_query(F.data == "withdraw_menu")
 async def withdraw_menu(call: CallbackQuery):
