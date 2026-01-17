@@ -145,53 +145,56 @@ function updateGameState() {
 
 function drawWheel(total) {
     ctx.clearRect(0, 0, 300, 300);
-    let start = 0;
 
+    // 1. СЛОЙ СВЕЧЕНИЯ (РИСУЕМ ПОД КОЛЕСОМ)
+    let start = 0;
     players.forEach(p => {
         const slice = (p.bet / total) * 2 * Math.PI;
 
         ctx.save();
-
-        // СВЕЧЕНИЕ ПОД ЦВЕТ ЯЧЕЙКИ (Сзади)
-        ctx.shadowBlur = 40;
+        ctx.beginPath();
+        // Рисуем дугу чуть большего радиуса (150) и с большим блюром
+        ctx.arc(150, 150, 149, start, start + slice);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 60;  // Сильное размытие (свечение)
         ctx.shadowColor = p.color;
+        ctx.fill();
+        ctx.restore();
+
+        start += slice;
+    });
+
+    // 2. ОСНОВНОЙ СЛОЙ (ЧИСТЫЕ СЕГМЕНТЫ)
+    start = 0;
+    players.forEach(p => {
+        const slice = (p.bet / total) * 2 * Math.PI;
 
         ctx.beginPath();
         ctx.moveTo(150, 150);
         ctx.arc(150, 150, 148, start, start + slice);
         ctx.closePath();
 
-        // ПЛОСКИЙ ЦВЕТ (без градиента)
-        ctx.fillStyle = p.color;
+        ctx.fillStyle = p.color; // Чистый цвет (без тени)
         ctx.fill();
 
-        // ТЁМНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ СЕГМЕНТАМИ
-        ctx.strokeStyle = '#0a0a0f';
+        // Разделители
+        ctx.strokeStyle = '#0a0a0f'; // Темный шов
         ctx.lineWidth = 2;
-
-        ctx.beginPath();
-        ctx.moveTo(150, 150);
-        const endX = 150 + 148 * Math.cos(start);
-        const endY = 150 + 148 * Math.sin(start);
-        ctx.lineTo(endX, endY);
         ctx.stroke();
 
-        ctx.restore();
         start += slice;
     });
 
-    // ОБЩИЙ БЛЕСК СВЕРХУ (Стекло)
+    // 3. ОБЩИЙ БЛЕСК (СТЕКЛО)
     ctx.save();
     ctx.beginPath();
     ctx.arc(150, 150, 148, 0, Math.PI * 2);
     const shine = ctx.createRadialGradient(150, 50, 10, 150, 150, 250);
-    shine.addColorStop(0, "rgba(255, 255, 255, 0.2)");
+    shine.addColorStop(0, "rgba(255, 255, 255, 0.15)");
     shine.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = shine;
     ctx.fill();
     ctx.restore();
-
-    ctx.shadowBlur = 0;
 }
 
 function adjustColor(hex, amt) {
@@ -451,13 +454,27 @@ function resetGame() {
 async function updateServerBalance(newBalance) {
     if (!uParam) return;
     try {
-        await fetch(`${BOT_API_URL}/api/balance`, {
+        // Мы используем fetch с таймаутом, чтобы игра не висла
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const res = await fetch(`${BOT_API_URL}/api/balance`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: uParam, balance: newBalance })
+            body: JSON.stringify({ user_id: uParam, balance: newBalance }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error("Server error");
+
     } catch (e) {
         console.error("Save balance failed", e);
+        statusDot.classList.remove('connected');
+        statusDot.classList.add('disconnected');
+        // Если это была реальная ставка, надо предупредить
+        // Но чтобы не спамить алертами каждую секунду, делаем аккуратно
+        // window.Telegram.WebApp.showAlert("⚠️ ОШИБКА: Сервер не сохранил баланс! Проверьте интернет.");
     }
 }
 
