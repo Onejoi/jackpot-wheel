@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('status-dot');
 
     let players = [];
-    let myColor = null; // Цвет игрока теперь генерируется при входе
 
     // ЦЕНТРАЛЬНЫЙ АДРЕС БОТА (Railway Production)
     const BOT_API_URL = "https://jackpot-wheel-production.up.railway.app";
@@ -44,24 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval = null;
     let botInterval = null;
 
-    // ГЕНЕРАТОР УНИКАЛЬНЫХ ЦВЕТОВ (Golden Ratio)
-    let colorHuet = Math.random() * 360;
-    function generateNeonColor() {
-        colorHuet += 0.618033988749895 * 360; // Золотое сечение
-        colorHuet %= 360;
-        return `hsl(${colorHuet}, 100%, 60%)`; // Максимальная насыщенность
-    }
-
-    // Боты теперь генерируют цвета на лету
-    const botNamesPool = [
-        '@cyber_ghost', '@neon_heart', '@luck_star', '@gold_king',
-        '@void_walker', '@hyper_drive', '@quantum_bit', '@plasma_coil',
-        '@nova_flare', '@glitch_fix', '@laser_beam', '@acid_rain',
-        '@blaze_it', '@toxic_fog', '@aqua_glow', '@sky_link',
-        '@ruby_eye', '@amber_wave', '@signal_lost', '@neon_pulse'
+    const botPool = [
+        { name: '@cyber_ghost', color: '#FF0000' }, // Чистый красный
+        { name: '@neon_heart', color: '#FF8C00' },  // Оранжевый
+        { name: '@luck_star', color: '#FFD700' },   // Золотой
+        { name: '@gold_king', color: '#ADFF2F' },   // Лаймовый
+        { name: '@void_walker', color: '#00FF00' }, // Чистый зелёный
+        { name: '@hyper_drive', color: '#00FA9A' }, // Мятный
+        { name: '@quantum_bit', color: '#00FFFF' }, // Бирюзовый
+        { name: '@plasma_coil', color: '#1E90FF' }, // Голубой
+        { name: '@nova_flare', color: '#0000FF' },  // Синий
+        { name: '@glitch_fix', color: '#4B0082' },  // Индиго
+        { name: '@laser_beam', color: '#8B00FF' },  // Фиолетовый
+        { name: '@acid_rain', color: '#FF00FF' },   // Маджента
+        { name: '@blaze_it', color: '#FF1493' },    // Розовый
+        { name: '@toxic_fog', color: '#DC143C' },   // Малиновый
+        { name: '@aqua_glow', color: '#40E0D0' },   // Бирюза светлая
+        { name: '@sky_link', color: '#7B68EE' },    // Сиреневый
+        { name: '@ruby_eye', color: '#FF4500' },    // Красно-оранжевый
+        { name: '@amber_wave', color: '#32CD32' },  // Травяной
+        { name: '@signal_lost', color: '#00CED1' }, // Тёмная бирюза
+        { name: '@neon_pulse', color: '#9400D3' }   // Тёмный фиолетовый
     ];
-
-    const botPool = botNamesPool.map(name => ({ name, color: generateNeonColor() }));
 
     async function init() {
         resizeCanvas();
@@ -116,13 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isSpinning) return;
         const pIdx = players.findIndex(p => p.name === name);
         if (pIdx >= 0) players[pIdx].bet += amount;
-        else {
-            // Если игрок новый — генерируем ему уникальный цвет, если не передан
-            const newColor = color || generateNeonColor();
-            players.push({ name, bet: amount, color: newColor });
-            // Сохраняем мой цвет
-            if (name === myUsername) myColor = newColor;
-        }
+        else players.push({ name, bet: amount, color });
         if (!timerStarted) { timerStarted = true; startRound(); }
         updateGameState();
     }
@@ -155,31 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, 300, 300);
         let start = 0;
 
-        // ШАГ 1: Рисуем СВЕЧЕНИЕ (задний план) для каждого сегмента
-        players.forEach(p => {
-            const slice = (p.bet / total) * 2 * Math.PI;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(150, 150);
-            ctx.arc(150, 150, 148, start, start + slice);
-            ctx.closePath();
-
-            // Специфическое неоновое свечение (Backlight)
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 60; // Сильное размытие как у таймера
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = p.color;
-            ctx.stroke(); // Рисуем контур для свечения
-            ctx.restore();
-
-            start += slice;
-        });
-
-        // Сбрасываем угол для второго прохода
-        start = 0;
-
-        // ШАГ 2: Рисуем сами СЕГМЕНТЫ (поверх свечения)
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
 
@@ -193,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = p.color;
             ctx.fill();
 
-            // ТЁМНЫЕ РАЗДЕЛИТЕЛИ
+            // ТЁМНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ СЕГМЕНТАМИ
             ctx.strokeStyle = '#0a0a0f';
             ctx.lineWidth = 2;
 
@@ -204,16 +176,23 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(endX, endY);
             ctx.stroke();
 
-            // Спинка сегмента (внешний ободок) — тонкая линия цвета сегмента
-            ctx.beginPath();
-            ctx.arc(150, 150, 148, start, start + slice);
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
             ctx.restore();
             start += slice;
         });
+
+        // ВНЕШНЕЕ СВЕЧЕНИЕ (мощное, как у таймера)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(150, 150, 148, 0, Math.PI * 2);
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 5;
+        ctx.shadowBlur = 60;
+        ctx.shadowColor = '#00f2fe';
+        ctx.stroke();
+        // Двойной слой для усиления эффекта
+        ctx.stroke();
+        ctx.stroke();
+        ctx.restore();
 
         // ОБЩИЙ БЛЕСК СВЕРХУ (Стекло)
         ctx.save();
@@ -257,40 +236,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderList(total) {
         const sorted = [...players].sort((a, b) => b.bet - a.bet);
-        const listContainer = playersList;
-        const rows = Array.from(listContainer.children);
-
-        // Удаляем лишние строки, если игроков стало меньше
-        while (rows.length > sorted.length) {
-            listContainer.removeChild(rows.pop());
-        }
-
-        sorted.forEach((p, i) => {
-            let row = rows[i];
-            if (!row) {
-                row = document.createElement('div');
-                row.className = 'player-row';
-                // Добавляем transition для плавности (сработает при смене стилей, но не порядка)
-                row.style.transition = "all 0.3s ease";
-                row.innerHTML = `
-                    <div class="player-color"></div>
-                    <div class="player-info"><div class="player-name"></div><div class="player-bet"></div></div>
-                    <div class="player-percent"></div>
-                `;
-                listContainer.appendChild(row);
-            }
-
-            // Обновляем контент без мерцания (innerHTML не трогаем целиком)
-            row.querySelector('.player-color').style.background = p.color;
-            row.querySelector('.player-name').textContent = p.name;
-            row.querySelector('.player-bet').textContent = p.bet.toFixed(2) + ' USDT';
-            row.querySelector('.player-percent').textContent = ((p.bet / total) * 100).toFixed(1) + '%';
-        });
+        playersList.innerHTML = sorted.map(p => `
+            <div class="player-row">
+                <div class="player-color" style="background:${p.color}"></div>
+                <div class="player-info"><div class="player-name">${p.name}</div><div class="player-bet">${p.bet.toFixed(2)} USDT</div></div>
+                <div class="player-percent">${((p.bet / total) * 100).toFixed(1)}%</div>
+            </div>
+        `).join('');
     }
 
     betBtn.addEventListener('click', async () => {
         const val = parseFloat(betInput.value);
-        if (val >= 1.0 && val <= myBalance) { // Мин ставка 1.0 USDT
+        if (val >= 0.1 && val <= myBalance) {
             // Сначала уведомляем бота о ставке, чтобы он вычел из БД
             const ok = await notifyBotOfBet(uParam, val);
             if (!ok) {
@@ -300,11 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             myBalance -= val;
             updateBalanceUI();
-            // Используем мой сохраненный цвет
-            handleNewBet(val, myUsername, myColor);
+            handleNewBet(val, myUsername, '#10b981');
             betInput.value = '';
-        } else if (val < 1.0) {
-            window.Telegram.WebApp.showAlert("Минимальная ставка 1 USDT");
         }
     });
 

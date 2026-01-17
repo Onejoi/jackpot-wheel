@@ -73,10 +73,10 @@ async def start(message: types.Message, user: types.User = None):
     balance = get_user_balance(user_id)
     
     text = (
-        f"🎰 <b>JACKPOT WHEEL</b> — Испытай удачу! 🚀\n\n"
-        f"Привет, <b>{tgt_user.full_name}</b>!\n"
-        f"Твой баланс: <b>{balance:.2f} USDT</b>\n\n"
-        f"ℹ️ <i>Советуем прочитать информацию о проекте перед игрой.</i>"
+        f"🎰 <b>JACKPOT WHEEL</b> — Крути колесо и забирай банк! 🚀🔥\n\n"
+        f"👤 Игрок: <b>{tgt_user.full_name}</b>\n"
+        f"💰 Баланс: <b>{balance:.2f} USDT</b>\n\n"
+        f"⚖️ <i>Комиссия вывода: 0%\nКомиссия игры: 5% (в банк раунда)</i>"
     )
     
     # Передаем реальный баланс в URL для Mini App
@@ -85,29 +85,11 @@ async def start(message: types.Message, user: types.User = None):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎲 ИГРАТЬ (НАЧАТЬ)", web_app=WebAppInfo(url=app_url))],
         [InlineKeyboardButton(text="💎 ПОПОЛНИТЬ USDT", callback_data="deposit_menu")],
-        [InlineKeyboardButton(text="ℹ️ ИНФОРМАЦИЯ", callback_data="info_menu")]
+        [InlineKeyboardButton(text="📤 ВЫВЕСТИ", callback_data="withdraw_menu")]
     ])
     
     # Отправляем обычный текст без фото
     await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
-
-@dp.callback_query(F.data == "info_menu")
-async def info_menu(call: CallbackQuery):
-    text = (
-        f"ℹ️ <b>ИНФОРМАЦИЯ О ПРОЕКТЕ</b>\n\n"
-        f"⚙️ <b>Механика:</b>\n"
-        f"1. Игроки делают ставки в общий банк.\n"
-        f"2. Чем больше ставка, тем больше шанс (сектор на колесе).\n"
-        f"3. Рулетка выбирает одного победителя, который забирает ВСЁ!\n\n"
-        f"💸 <b>Комиссия:</b>\n"
-        f"— Комиссия сервиса: <b>10%</b> от суммы выигрыша.\n"
-        f"— Вывод средств: комиссия сети вычитается из суммы вывода.\n\n"
-        f"<i>Приятной игры!</i>"
-    )
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="« НАЗАД", callback_data="back_to_start")]
-    ])
-    await call.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
 @dp.callback_query(F.data == "deposit_menu")
 async def deposit_menu(call: CallbackQuery):
@@ -129,8 +111,6 @@ async def process_buy(call: CallbackQuery):
     amount = float(call.data.split("_")[1])
     update_user_balance(call.from_user.id, amount, call.from_user.username)
     await call.answer(f"✅ Баланс пополнен на {amount} USDT!", show_alert=True)
-    # Удаляем сообщение с кнопками оплаты, чтобы не засорять чат
-    await call.message.delete()
     await start(call.message, user=call.from_user) # Передаем ПРАВИЛЬНОГО юзера
 
 @dp.callback_query(F.data == "withdraw_menu")
