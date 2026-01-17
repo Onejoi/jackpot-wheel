@@ -25,6 +25,12 @@ const myUsername = urlParams.get('username') || "You";
 // Инициализируем баланс сразу из URL, если есть, иначе 0
 myBalance = parseFloat(urlParams.get('balance')) || 0;
 
+// Если баланс пришел из URL - считаем, что мы "подключены" (данные есть)
+if (urlParams.has('balance')) {
+    statusDot.classList.add('connected');
+    statusDot.classList.remove('disconnected');
+}
+
 // Генерация уникальных цветов (Golden Ratio)
 let colorHue = 0;
 function getNextColor() {
