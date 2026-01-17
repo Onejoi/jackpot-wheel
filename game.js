@@ -311,15 +311,11 @@ document.querySelectorAll('.quick-btn').forEach(btn => {
         }
 
         const amt = parseFloat(btn.dataset.amount);
-        if (amt > myBalance) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            return;
-        }
+        const currentVal = parseFloat(customBetInput.value) || 0;
+        const newVal = (currentVal + amt).toFixed(2);
 
-        const myColor = (players.find(p => p.name === myUsername) || {}).color || getNextColor();
-        updateBalance(-amt);
-        handleNewBet(amt, myUsername, myColor);
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('light');
+        customBetInput.value = newVal;
+        // window.Telegram.WebApp.HapticFeedback.selectionChanged();
     });
 });
 
