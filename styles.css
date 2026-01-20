@@ -224,8 +224,8 @@ body {
 
 .bet-btn-main:active {
     transform: scale(0.95);
-    background: #00cc88;
-    box-shadow: 0 0 5px rgba(0, 255, 170, 0.8);
+    background: #00d2fe;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
 }
 
 .bet-actions-quick {
