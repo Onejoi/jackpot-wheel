@@ -63,7 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeCanvas();
         updateBalanceUI();
         updateGameState();
-        window.Telegram.WebApp.expand();
+
+        // ТЕМНАЯ ТЕМА ДЛЯ ВСЕГО ПРИЛОЖЕНИЯ
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.setHeaderColor('#0d0e12');
+            window.Telegram.WebApp.setBackgroundColor('#0d0e12');
+        }
 
         // Синхронизируем баланс с ботом ПРИ ЗАПУСКЕ (реальный баланс из БД)
         await syncBalance();
@@ -156,15 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.beginPath();
             ctx.arc(150, 150, 142, start, start + slice);
 
-            // Внешний мощный ореол
-            ctx.shadowBlur = 50;
+            // Внешний мощный ореол (ЯРКИЙ НЕОН)
+            ctx.shadowBlur = 60;
             ctx.shadowColor = p.color;
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 10; // Еще толще для яркости
             ctx.stroke();
 
-            // Внутренний яркий фокус (второй слой для плотности)
-            ctx.shadowBlur = 20;
+            // Внутренний горящий фокус
+            ctx.shadowBlur = 25;
             ctx.stroke();
 
             ctx.restore();
@@ -371,14 +377,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // В центре пишем кто победил
             timerDisplay.textContent = "Winner!";
             timerDisplay.style.fontSize = "20px";
-            timerDisplay.style.color = "#00ffaa";
+            timerDisplay.style.color = "#00f2fe";
 
             // Показываем имя И сумму выигрыша (многострочно)
             const fontSize = winner.name.length > 12 ? "12px" : "15px";
             const potContainer = document.getElementById('pot-total-container');
             potContainer.innerHTML = `
                 <div style="font-size: ${fontSize}; color: #fff; font-weight: 700; line-height: 1.1;">${winner.name}</div>
-                <div style="font-size: 14px; color: #00ffaa; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
+                <div style="font-size: 14px; color: #00f2fe; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
             `;
 
             // Уведомление ТОЛЬКО если выиграл я
