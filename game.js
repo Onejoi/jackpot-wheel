@@ -37,11 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         myBalance = parseFloat(localStorage.getItem('test_balance')) || 100.00;
     }
 
-    let roundTime = 120; // 2 МИНУТЫ КД
+    let roundTime = 120;
     let isSpinning = false;
-    let timerStarted = false;
-    let timerInterval = null;
-    let botInterval = null;
+    let syncInterval = null;
 
     const botNames = [
         '@cyber_ghost', '@neon_heart', '@luck_star', '@gold_king', '@void_walker',
@@ -74,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Синхронизируем баланс с ботом ПРИ ЗАПУСКЕ (реальный баланс из БД)
         await syncBalance();
+
+        // Запуск ПЕРМАНЕНТНОЙ синхронизации раундов
+        startSyncLoop();
     }
 
     async function syncBalance() {
@@ -115,17 +116,45 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.scale(dpr, dpr);
     }
 
-    function handleNewBet(amount, name, color) {
-        if (isSpinning) return;
-        const pIdx = players.findIndex(p => p.name === name);
-        if (pIdx >= 0) players[pIdx].bet += amount;
-        else {
-            // Если цвет не передан (новый игрок/бот), генерируем уникальный
-            const finalColor = color || getNextNeonColor();
-            players.push({ name, bet: amount, color: finalColor });
+    async function syncGame() {
+        try {
+            const res = await fetch(`${BOT_API_URL}/api/state`);
+            const state = await res.json();
+
+            // 1. Синхронизируем список игроков
+            players = state.players;
+
+            // 2. Синхронизируем таймер
+            roundTime = state.round_time;
+
+            // 3. Синхронизируем статус раунда
+            if (state.status === 'spinning' && !isSpinning) {
+                // Сервер сказал крутить!
+                startSpinProcess(state.last_winner);
+            } else if (state.status === 'waiting' && isSpinning) {
+                // Раунд закончился на сервере, сбрасываем локально
+                resetGame();
+            }
+
+            // Обновляем UI только если не крутим прямо сейчас
+            if (!isSpinning) {
+                const mins = Math.floor(roundTime / 60);
+                const secs = roundTime % 60;
+                timerDisplay.textContent = `${mins}:${secs < 10 ? '0' + secs : secs}`;
+                timerDisplay.style.color = "#00FF00";
+                timerDisplay.style.fontSize = "";
+                updateGameState();
+            }
+
+        } catch (e) {
+            console.error("Sync Error:", e);
         }
-        if (!timerStarted) { timerStarted = true; startRound(); }
-        updateGameState();
+    }
+
+    function startSyncLoop() {
+        if (syncInterval) clearInterval(syncInterval);
+        syncGame(); // Первый запуск сразу
+        syncInterval = setInterval(syncGame, 1000); // Опрос каждую секунду
     }
 
     function updateGameState() {
@@ -290,7 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = parseFloat(betInput.value);
         if (val >= 0.1 && val <= myBalance) {
             // Сначала уведомляем бота о ставке, чтобы он вычел из БД
-            const ok = await notifyBotOfBet(uParam, val);
+            const myColor = getNextNeonColor(); // Берем свой неон
+            const ok = await notifyBotOfBet(uParam, val, myUsername, myColor);
             if (!ok) {
                 window.Telegram.WebApp.showAlert("❌ Ошибка связи с ботом. Ставка не принята.");
                 return;
@@ -298,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             myBalance -= val;
             updateBalanceUI();
-            handleNewBet(val, myUsername, null);
             betInput.value = '';
+            // Локально не добавляем, ждем синхронизации syncGame()
         }
     });
 
@@ -313,46 +343,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    function startRound() {
-        timerInterval = setInterval(() => {
-            if (roundTime > 0) {
-                roundTime--;
-                const mins = Math.floor(roundTime / 60);
-                const secs = roundTime % 60;
-                timerDisplay.textContent = `${mins}:${secs < 10 ? '0' + secs : secs}`;
-            }
-            else { clearInterval(timerInterval); clearInterval(botInterval); startSpinProcess(); }
-        }, 1000);
-        let availableBots = [...botNames]; // Пул имен ботов
-        botInterval = setInterval(() => {
-            if (!isSpinning) {
-                // Логика: если боты есть в пуле, заходят новые
-                // Если пул пуст, существующие боты докидывают ставки
-                if (availableBots.length > 0) {
-                    const idx = Math.floor(Math.random() * availableBots.length);
-                    const botName = availableBots.splice(idx, 1)[0];
-                    // Цвет генерируется автоматически в handleNewBet
-                    handleNewBet(Math.floor(Math.random() * 15) + 5, botName, null);
-                } else if (players.length > 0) {
-                    const existingBot = players[Math.floor(Math.random() * players.length)];
-                    if (existingBot.name !== myUsername) {
-                        handleNewBet(Math.floor(Math.random() * 10) + 3, existingBot.name, existingBot.color);
-                    }
-                }
-            }
-        }, 2000);
-    }
-    function startSpinProcess() {
+    function startSpinProcess(serverWinner) {
+        if (isSpinning) return;
         isSpinning = true;
+
         timerDisplay.textContent = "ROLLING";
         timerDisplay.style.color = "#fbbf24";
 
         const total = players.reduce((s, p) => s + p.bet, 0);
-        const winTicket = Math.random() * total;
-        let acc = 0, winner = players[0], wStart = 0, wEnd = 0;
+
+        // Победитель теперь приходит от сервера для всех одинаково
+        let winner = serverWinner || players[0];
+
+        // Находим реальный индекс/сектор победителя в текущем списке
+        let acc = 0, wStart = 0, wEnd = 360;
         for (let p of players) {
-            if (winTicket >= acc && winTicket < acc + p.bet) {
-                winner = p; wStart = (acc / total) * 360; wEnd = ((acc + p.bet) / total) * 360; break;
+            if (p.name === winner.name) {
+                wStart = (acc / total) * 360;
+                wEnd = ((acc + p.bet) / total) * 360;
+                winner = p; // Берем объект с цветом
+                break;
             }
             acc += p.bet;
         }
@@ -437,14 +447,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function notifyBotOfBet(userId, amount) {
+    async function notifyBotOfBet(userId, amount, name, color) {
         if (!userId) return true;
         try {
             const API_URL = `${BOT_API_URL}/api/bet`;
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, amount: amount })
+                body: JSON.stringify({
+                    user_id: userId,
+                    amount: amount,
+                    name: name,
+                    color: color
+                })
             });
             return res.ok;
         } catch (e) {

@@ -58,11 +58,73 @@ def update_user_balance(user_id, amount, username=None):
     conn.close()
 
 # ---------------------------------------------
-# БОТ
+# БОТ И ГЛОБАЛЬНОЕ СОСТОЯНИЕ ИГРЫ
 # ---------------------------------------------
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+
+# Глобальное состояние игры (Source of Truth)
+game_state = {
+    "round_time": 120,
+    "players": [],       # [{name, bet, color}, ...]
+    "status": "waiting", # waiting, spinning
+    "last_winner": None,
+    "total_bank": 0.0
+}
+
+def reset_global_game():
+    game_state["round_time"] = 120
+    game_state["players"] = []
+    game_state["status"] = "waiting"
+    game_state["last_winner"] = None
+    game_state["total_bank"] = 0.0
+    print("♻️ GLOBAL GAME RESET")
+
+def calculate_winner():
+    if not game_state["players"]:
+        return None
+    
+    total = sum(p["bet"] for p in game_state["players"])
+    win_ticket = sum(p["bet"] for p in game_state["players"]) * (os.urandom(4)[0] / 255) # Рандом
+    
+    acc = 0
+    for p in game_state["players"]:
+        if win_ticket >= acc and win_ticket < acc + p["bet"]:
+            return p
+        acc += p["bet"]
+    return game_state["players"][0]
+
+async def game_loop():
+    """Фоновый цикл игры, который идет постоянно"""
+    print("⚙️ Game Loop Started")
+    while True:
+        if game_state["status"] == "waiting":
+            if game_state["round_time"] > 0:
+                await asyncio.sleep(1)
+                game_state["round_time"] -= 1
+                
+                # Имитация ботов на сервере (чтобы все видели одинаково)
+                if game_state["round_time"] % 15 == 0 and len(game_state["players"]) < 10:
+                    bot_name = os.urandom(4).hex()[:6] # Временный бот
+                    game_state["players"].append({
+                        "name": f"bot_{bot_name}",
+                        "bet": 5.0,
+                        "color": f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"
+                    })
+            else:
+                # ВРЕМЯ ВЫШЛО -> КРУТИМ
+                game_state["status"] = "spinning"
+                winner = calculate_winner()
+                game_state["last_winner"] = winner
+                print(f"🎰 SPINNING! Winner: {winner['name'] if winner else 'None'}")
+                
+                # Ждем 10 секунд (время анимации + показ результата)
+                await asyncio.sleep(10)
+                reset_global_game()
+        else:
+            await asyncio.sleep(1)
+
 
 @dp.message(Command("start"))
 async def start(message: types.Message, user: types.User = None, is_new: bool = False):
@@ -205,16 +267,39 @@ async def get_balance_handler(request):
     print(f"📡 [API] Запрос баланса: User {uid} -> {balance} USDT")
     return web.json_response({"balance": balance})
 
+async def get_state_handler(request):
+    """Отдает состояние игры всем клиентам"""
+    # Рассчитываем общий банк перед отправкой
+    game_state["total_bank"] = sum(p["bet"] for p in game_state["players"])
+    return web.json_response(game_state)
+
 async def handle_bet(request):
     data = await request.json()
     uid = int(data.get("user_id"))
     amount = float(data.get("amount"))
+    name = data.get("name", "Unknown")
+    color = data.get("color")
 
-    # Вычитаем ставку из БД сразу
+    # 1. Вычитаем ставку из БД
     update_user_balance(uid, -amount)
     new_balance = get_user_balance(uid)
     
-    print(f"💸 [API] СТАВКА: User {uid} поставил -{amount} USDT. Остаток: {new_balance}")
+    # 2. Добавляем в ГЛОБАЛЬНЫЙ список игроков
+    # Проверяем, есть ли уже такой игрок
+    found = False
+    for p in game_state["players"]:
+        if p["name"] == name:
+            p["bet"] += amount
+            found = True
+            break
+    if not found:
+        game_state["players"].append({
+            "name": name,
+            "bet": amount,
+            "color": color or f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"
+        })
+
+    print(f"💸 [API] СТАВКА: {name} поставил {amount} USDT. Остаток: {new_balance}")
     return web.json_response({"status": "ok", "new_balance": new_balance})
 
 async def handle_win(request):
@@ -280,6 +365,9 @@ async def run_api():
     bet_res = app.router.add_resource("/api/bet")
     cors.add(bet_res.add_route("POST", handle_bet))
     
+    state_res = app.router.add_resource("/api/state")
+    cors.add(state_res.add_route("GET", get_state_handler))
+    
     runner = web.AppRunner(app)
     await runner.setup()
     
@@ -294,10 +382,11 @@ async def main():
     init_db()
     print("\n🚀 БОТ ЗАПУЩЕН С БАЗОЙ ДАННЫХ!")
     
-    # Запускаем API и бота параллельно
+    # Запускаем API, бота и игровой цикл параллельно
     await asyncio.gather(
         dp.start_polling(bot),
-        run_api()
+        run_api(),
+        game_loop()
     )
 
 if __name__ == "__main__":
