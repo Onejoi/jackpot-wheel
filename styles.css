@@ -300,6 +300,8 @@ body {
     flex: 1;
     overflow-y: auto;
     background: #18191c;
+    display: flex;
+    flex-direction: column;
 }
 
 .list-header {

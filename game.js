@@ -233,13 +233,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderList(total) {
         const sorted = [...players].sort((a, b) => b.bet - a.bet);
-        playersList.innerHTML = sorted.map(p => `
-            <div class="player-row">
-                <div class="player-color" style="background:${p.color}"></div>
-                <div class="player-info"><div class="player-name">${p.name}</div><div class="player-bet">${p.bet.toFixed(2)} USDT</div></div>
-                <div class="player-percent">${((p.bet / total) * 100).toFixed(1)}%</div>
-            </div>
-        `).join('');
+
+        // Получаем текущие ID элементов в списке
+        const currentElements = Array.from(playersList.children);
+        const playerMap = new Map();
+
+        sorted.forEach((p, index) => {
+            const chance = ((p.bet / total) * 100).toFixed(1);
+            let rowIdx = currentElements.findIndex(el => el.getAttribute('data-name') === p.name);
+
+            if (rowIdx >= 0) {
+                // ОБНОВЛЯЕМ существующую строку
+                const row = currentElements[rowIdx];
+                row.querySelector('.player-bet').textContent = `${p.bet.toFixed(2)} USDT`;
+                row.querySelector('.player-percent').textContent = `${chance}%`;
+                row.style.order = index; // Сортировка через CSS order
+                playerMap.set(p.name, row);
+                currentElements.splice(rowIdx, 1);
+            } else {
+                // СОЗДАЕМ новую строку
+                const row = document.createElement('div');
+                row.className = 'player-row';
+                row.setAttribute('data-name', p.name);
+                row.style.order = index;
+                row.innerHTML = `
+                    <div class="player-color" style="background:${p.color}"></div>
+                    <div class="player-info">
+                        <div class="player-name">${p.name}</div>
+                        <div class="player-bet">${p.bet.toFixed(2)} USDT</div>
+                    </div>
+                    <div class="player-percent">${chance}%</div>
+                `;
+                playersList.appendChild(row);
+                playerMap.set(p.name, row);
+            }
+        });
+
+        // Удаляем тех, кого больше нет (например после ресета)
+        currentElements.forEach(el => el.remove());
     }
 
     betBtn.addEventListener('click', async () => {
@@ -327,8 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setTimeout(async () => {
-            const netWin = (total - winner.bet) * 0.95;
-            const fee = (total - winner.bet) * 0.05;
+            const netWin = (total - winner.bet) * 0.90; // НАЛОГ 10% (было 5%)
+            const fee = (total - winner.bet) * 0.10;
             const payout = winner.bet + netWin;
 
             // В центре пишем кто победил
