@@ -196,7 +196,7 @@ body {
 }
 
 #net-bet-display {
-    color: #00f2fe;
+    color: #10b981;
     font-weight: 700;
 }
 
@@ -418,9 +418,9 @@ body {
 
 .amount-btn {
     padding: 15px;
-    background: #00f2fe11;
-    border: 1px solid #00f2fe33;
-    color: #00f2fe;
+    background: #10b98111;
+    border: 1px solid #10b98133;
+    color: #10b981;
     border-radius: 10px;
     font-size: 18px;
     font-weight: 800;
@@ -428,8 +428,8 @@ body {
 }
 
 .amount-btn:active {
-    background: #00f2fe;
-    color: #0d0e12;
+    background: #10b981;
+    color: #fff;
 }
 
 .close-btn {
