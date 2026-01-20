@@ -149,40 +149,47 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, 300, 300);
         let start = 0;
 
+        // 1. Сначала рисуем ГЛОУ (свечение) для каждого сегмента отдельно
+        // Рисуем дуги чуть шире, чем само колесо, с большой тенью
+        players.forEach(p => {
+            const slice = (p.bet / total) * 2 * Math.PI;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(150, 150, 146, start, start + slice);
+            ctx.shadowBlur = 40; // Мощное свечение
+            ctx.shadowColor = p.color;
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.restore();
+            start += slice;
+        });
+
+        // 2. Затем рисуем сами сегменты поверх, чтобы перекрыть внутренние тени
+        start = 0;
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
 
             ctx.save();
-
-            // 2. ПОДСВЕТКА СЗАДИ ЯЧЕЙКИ (Свой цвет для каждого сегмента)
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = p.color;
-
             ctx.beginPath();
             ctx.moveTo(150, 150);
             ctx.arc(150, 150, 148, start, start + slice);
             ctx.closePath();
 
-            // ПЛОСКИЙ ЦВЕТ (без градиента)
             ctx.fillStyle = p.color;
             ctx.fill();
 
             // ТЁМНЫЕ РАЗДЕЛИТЕЛИ МЕЖДУ СЕГМЕНТАМИ
             ctx.strokeStyle = '#0a0a0f';
-            ctx.lineWidth = 2;
-
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(150, 150);
-            const endX = 150 + 148 * Math.cos(start);
-            const endY = 150 + 148 * Math.sin(start);
-            ctx.lineTo(endX, endY);
+            ctx.lineTo(150 + 148 * Math.cos(start), 150 + 148 * Math.sin(start));
             ctx.stroke();
 
             ctx.restore();
             start += slice;
         });
-
-        ctx.restore();
 
         // ОБЩИЙ БЛЕСК СВЕРХУ (Стекло)
         ctx.save();
