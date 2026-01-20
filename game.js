@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mins = Math.floor(roundTime / 60);
                 const secs = roundTime % 60;
                 timerDisplay.textContent = `${mins}:${secs < 10 ? '0' + secs : secs}`;
-                timerDisplay.style.color = "#00FF00";
+                timerDisplay.style.color = "#FF0000";
                 timerDisplay.style.fontSize = "";
                 updateGameState();
             }

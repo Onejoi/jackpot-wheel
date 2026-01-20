@@ -100,28 +100,37 @@ async def game_loop():
     print("⚙️ Game Loop Started")
     while True:
         if game_state["status"] == "waiting":
-            if game_state["round_time"] > 0:
-                await asyncio.sleep(1)
-                game_state["round_time"] -= 1
-                
-                # Имитация ботов на сервере (чтобы все видели одинаково)
-                if game_state["round_time"] % 15 == 0 and len(game_state["players"]) < 10:
-                    bot_name = os.urandom(4).hex()[:6] # Временный бот
-                    game_state["players"].append({
-                        "name": f"bot_{bot_name}",
-                        "bet": 5.0,
-                        "color": f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"
-                    })
+            # Таймер идет ТОЛЬКО если есть хотя бы 2 игрока (или 1 игрок и боты)
+            if len(game_state["players"]) >= 2:
+                if game_state["round_time"] > 0:
+                    await asyncio.sleep(1)
+                    game_state["round_time"] -= 1
+                else:
+                    # ВРЕМЯ ВЫШЛО -> КРУТИМ
+                    game_state["status"] = "spinning"
+                    winner = calculate_winner()
+                    game_state["last_winner"] = winner
+                    print(f"🎰 SPINNING! Winner: {winner['name'] if winner else 'None'}")
+                    
+                    # Ждем 10 секунд (время анимации + показ результата)
+                    await asyncio.sleep(10)
+                    reset_global_game()
             else:
-                # ВРЕМЯ ВЫШЛО -> КРУТИМ
-                game_state["status"] = "spinning"
-                winner = calculate_winner()
-                game_state["last_winner"] = winner
-                print(f"🎰 SPINNING! Winner: {winner['name'] if winner else 'None'}")
+                # Меньше 2 игроков -> Ждем, таймер не идет
+                game_state["round_time"] = 120
+                await asyncio.sleep(1)
                 
-                # Ждем 10 секунд (время анимации + показ результата)
-                await asyncio.sleep(10)
-                reset_global_game()
+                # Добавляем ботов ТОЛЬКО если есть хотя бы 1 реальный игрок
+                # Чтобы игра не шла сама с собой
+                if len(game_state["players"]) >= 1 and len(game_state["players"]) < 10:
+                    # Раз в 15 секунд (примерно) закидываем бота
+                    if os.urandom(1)[0] < 20: # Шанс захода бота
+                        bot_name = os.urandom(4).hex()[:6]
+                        game_state["players"].append({
+                            "name": f"bot_{bot_name}",
+                            "bet": 5.0,
+                            "color": f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"
+                        })
         else:
             await asyncio.sleep(1)
 
