@@ -378,14 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // В центре пишем кто победил
             timerDisplay.textContent = "Winner!";
             timerDisplay.style.fontSize = "20px";
-            timerDisplay.style.color = "#00ffaa"; // ПРИЯТНЫЙ ЗЕЛЕНЫЙ ДЛЯ ПОБЕДЫ
+            timerDisplay.style.color = "#00FF00"; // ПРИЯТНЫЙ ЗЕЛЕНЫЙ ДЛЯ ПОБЕДЫ
 
             // Показываем имя И сумму выигрыша (многострочно)
             const fontSize = winner.name.length > 12 ? "12px" : "15px";
             const potContainer = document.getElementById('pot-total-container');
             potContainer.innerHTML = `
                 <div style="font-size: ${fontSize}; color: #fff; font-weight: 700; line-height: 1.1;">${winner.name}</div>
-                <div style="font-size: 14px; color: #00ffaa; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
+                <div style="font-size: 14px; color: #00FF00; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
             `;
 
             // Уведомление ТОЛЬКО если выиграл я

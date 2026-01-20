@@ -142,10 +142,10 @@ body {
 
 .pot-total {
     font-size: 26px;
-    color: #00ffaa;
+    color: #00FF00;
     font-weight: 800;
     margin-top: 5px;
-    text-shadow: 0 0 15px #00ffaa, 0 0 5px #fff;
+    text-shadow: 0 0 15px #00FF00, 0 0 5px #fff;
 }
 
 /* Betting Panel */
@@ -196,7 +196,7 @@ body {
 }
 
 #net-bet-display {
-    color: #10b981;
+    color: #00FF00;
     font-weight: 700;
 }
 
@@ -210,7 +210,7 @@ body {
 }
 
 .bet-btn-main {
-    background: #10b981;
+    background: #00FF00;
     color: #0d0e12;
     border: none;
     border-radius: 8px;
@@ -219,13 +219,13 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
 }
 
 .bet-btn-main:active {
     transform: scale(0.95);
-    background: #059669;
-    box-shadow: 0 0 5px rgba(16, 185, 129, 0.8);
+    background: #00cc00;
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
 }
 
 .bet-actions-quick {
@@ -259,8 +259,8 @@ body {
 }
 
 .status-dot.connected {
-    background: #10b981;
-    box-shadow: 0 0 5px #10b981;
+    background: #00FF00;
+    box-shadow: 0 0 5px #00FF00;
 }
 
 .status-dot.disconnected {
@@ -418,9 +418,9 @@ body {
 
 .amount-btn {
     padding: 15px;
-    background: #10b98111;
-    border: 1px solid #10b98133;
-    color: #10b981;
+    background: #00FF0011;
+    border: 1px solid #00FF0033;
+    color: #00FF00;
     border-radius: 10px;
     font-size: 18px;
     font-weight: 800;
@@ -428,8 +428,8 @@ body {
 }
 
 .amount-btn:active {
-    background: #10b981;
-    color: #fff;
+    background: #00FF00;
+    color: #0d0e12;
 }
 
 .close-btn {
