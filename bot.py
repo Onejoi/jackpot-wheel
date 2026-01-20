@@ -9,6 +9,7 @@ from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiohttp import web
 import aiohttp_cors
 import json
+import random
 
 # ---------------------------------------------
 # НАСТРОЙКИ
@@ -110,7 +111,40 @@ async def game_loop():
                     game_state["status"] = "spinning"
                     winner = calculate_winner()
                     game_state["last_winner"] = winner
-                    print(f"🎰 SPINNING! Winner: {winner['name'] if winner else 'None'}")
+                    
+                    if winner:
+                        total_bank = sum(p["bet"] for p in game_state["players"])
+                        print(f"🎰 SPINNING! Bank: {total_bank} USDT. Winner: {winner['name']}")
+                        
+                        # Если победитель - реальный игрок (есть user_id)
+                        if winner.get("user_id"):
+                            uid = winner["user_id"]
+                            net_win = (total_bank - winner["bet"]) * 0.90 # Налог 10%
+                            profit_fee = (total_bank - winner["bet"]) * 0.10
+                            payout = winner["bet"] + net_win
+                            
+                            # 1. Зачисляем в БД
+                            update_user_balance(uid, payout)
+                            
+                            # 2. Обновляем профит админа
+                            conn = sqlite3.connect('database.db')
+                            cursor = conn.cursor()
+                            cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (profit_fee,))
+                            conn.commit()
+                            conn.close()
+                            
+                            # 3. Шлем уведомление
+                            new_bal = get_user_balance(uid)
+                            try:
+                                asyncio.create_task(bot.send_message(
+                                    uid,
+                                    f"🎰 <b>ПОБЕДА В КОЛЕСЕ!</b>\n\n"
+                                    f"💰 Выигрыш: <b>+{payout:.2f} USDT</b>\n"
+                                    f"💳 Ваш баланс: <b>{new_bal:.2f} USDT</b>\n\n"
+                                    f"<i>Раунд завершен успешно!</i>",
+                                    parse_mode="HTML"
+                                ))
+                            except: pass
                     
                     # Ждем 10 секунд (время анимации + показ результата)
                     await asyncio.sleep(10)
@@ -121,14 +155,20 @@ async def game_loop():
                 await asyncio.sleep(1)
                 
                 # Добавляем ботов ТОЛЬКО если есть хотя бы 1 реальный игрок
-                # Чтобы игра не шла сама с собой
-                if len(game_state["players"]) >= 1 and len(game_state["players"]) < 10:
-                    # Раз в 15 секунд (примерно) закидываем бота
-                    if os.urandom(1)[0] < 20: # Шанс захода бота
-                        bot_name = os.urandom(4).hex()[:6]
+                if len(game_state["players"]) >= 1 and len(game_state["players"]) < 15:
+                    # Раз в 8-12 секунд закидываем бота (чаще чем раньше)
+                    if os.urandom(1)[0] < 45: 
+                        bot_names = ["Luck", "Neon", "Cyber", "Void", "Gold", "Star", "Apex", "Nova", "Bit", "Zen"]
+                        bot_suffix = os.urandom(2).hex()
+                        b_name = f"@{random.choice(bot_names)}_{bot_suffix}" if 'random' in globals() else f"@bot_{bot_suffix}"
+                        
+                        # Рандомная ставка от 0.1 до 25 USDT
+                        b_bet = round(0.1 + (os.urandom(1)[0] / 255) * 24.9, 1)
+                        
                         game_state["players"].append({
-                            "name": f"bot_{bot_name}",
-                            "bet": 5.0,
+                            "user_id": None, # Бот
+                            "name": b_name,
+                            "bet": b_bet,
                             "color": f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"
                         })
         else:
@@ -303,6 +343,7 @@ async def handle_bet(request):
             break
     if not found:
         game_state["players"].append({
+            "user_id": uid, # Сохраняем ID для выплаты на сервере
             "name": name,
             "bet": amount,
             "color": color or f"hsl({(len(game_state['players']) * 137) % 360}, 100%, 50%)"

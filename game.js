@@ -401,10 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Уведомление ТОЛЬКО если выиграл я
             if (winner.name === myUsername) {
                 window.Telegram.WebApp.showAlert(`🚀 ПОБЕДА! Вы выиграли ${payout.toFixed(2)} USDT`);
-                myBalance += payout;
-                updateBalanceUI();
-                // УВЕДОМЛЯЕМ БОТА О ВЫИГРЫШЕ
-                await notifyBotOfWin(uParam, payout, fee);
+                // Синхронизируем баланс с сервером ПОСЛЕ выигрыша
+                setTimeout(() => syncBalance(), 1000);
             }
 
             // Ровно через 3 секунды сбрасываем раунд для новой игры
@@ -432,20 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGameState();
     }
 
-    async function notifyBotOfWin(userId, amount, fee) {
-        if (!userId) return;
-        try {
-            const API_URL = `${BOT_API_URL}/api/win`;
-            await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, amount: amount, fee: fee })
-            });
-            console.log("Win notified successfully");
-        } catch (e) {
-            console.error("Win sync failed:", e);
-        }
-    }
 
     async function notifyBotOfBet(userId, amount, name, color) {
         if (!userId) return true;
