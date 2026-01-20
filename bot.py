@@ -104,7 +104,6 @@ async def game_loop():
             # Таймер идет ТОЛЬКО если есть хотя бы 2 игрока (или 1 игрок и боты)
             if len(game_state["players"]) >= 2:
                 if game_state["round_time"] > 0:
-                    await asyncio.sleep(1)
                     game_state["round_time"] -= 1
                 else:
                     # ВРЕМЯ ВЫШЛО -> КРУТИМ
