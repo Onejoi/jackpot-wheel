@@ -65,7 +65,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 @dp.message(Command("start"))
-async def start(message: types.Message, user: types.User = None):
+async def start(message: types.Message, user: types.User = None, is_new: bool = False):
     # Если зашли через команду — берем юзера из сообщения.
     # Если позвали из колбэка — используем переданного юзера.
     tgt_user = user if user else message.from_user
@@ -93,7 +93,7 @@ async def start(message: types.Message, user: types.User = None):
     try:
         # Если message - это CallbackQuery message, то .from_user - это Бот
         # Нам нужно понять, был ли это вызов из callback
-        if message.from_user.is_bot: 
+        if message.from_user.is_bot and not is_new: 
             await message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
         else:
             await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
@@ -139,40 +139,14 @@ async def process_buy(call: CallbackQuery):
     update_user_balance(call.from_user.id, amount, call.from_user.username)
     await call.answer(f"✅ Баланс пополнен на {amount} USDT!", show_alert=True)
     
-    # УДАЛЯЕМ сообщение с пополнением (Чистый чат)
+    # Сначала удаляем сообщение с кнопками пополнения
     try:
         await call.message.delete()
     except:
         pass
 
-    # Шлем новое приветствие с новым балансом
-    await start(call.message, user=call.from_user)
-
-@dp.callback_query(F.data == "withdraw_menu")
-async def withdraw_menu(call: CallbackQuery):
-    balance = get_user_balance(call.from_user.id)
-    text = (
-        f"📤 <b>ВЫВОД СРЕДСТВ</b>\n\n"
-        f"Твой баланс: <b>{balance:.2f} USDT</b>\n\n"
-        f"Минимальная сумма вывода: 5 USDT.\n"
-        f"Ведите кошелек USDT (TRC-20) в ответном сообщении (фейк):"
-    )
-    # Для теста просто кнопка "Вывести всё"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="ВЫВЕСТИ ВСЁ (ФЕЙК)", callback_data="fake_withdraw_all")],
-        [InlineKeyboardButton(text="« НАЗАД", callback_data="back_to_start")]
-    ])
-    await call.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
-
-@dp.callback_query(F.data == "fake_withdraw_all")
-async def fake_withdraw(call: CallbackQuery):
-    balance = get_user_balance(call.from_user.id)
-    if balance < 5:
-        await call.answer("❌ Минималка для вывода 5 USDT", show_alert=True)
-    else:
-        update_user_balance(call.from_user.id, -balance, call.from_user.username)
-        await call.answer(f"✅ Заявка на {balance} USDT принята!\nОжидайте выплату.", show_alert=True)
-        await start(call.message, user=call.from_user)
+    # Отправляем НОВОЕ чистое меню (т.к. старое удалено)
+    await start(call.message, user=call.from_user, is_new=True)
 
 @dp.callback_query(F.data == "back_to_start")
 async def back_to_start(call: CallbackQuery):

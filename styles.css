@@ -185,7 +185,7 @@ body {
 }
 
 .bet-input-container input:focus {
-    border-color: #10b981;
+    border-color: #00f2fe;
 }
 
 .fee-info {
@@ -196,7 +196,7 @@ body {
 }
 
 #net-bet-display {
-    color: #10b981;
+    color: #00f2fe;
     font-weight: 700;
 }
 
@@ -418,9 +418,9 @@ body {
 
 .amount-btn {
     padding: 15px;
-    background: #10b98111;
-    border: 1px solid #10b98133;
-    color: #10b981;
+    background: #00f2fe11;
+    border: 1px solid #00f2fe33;
+    color: #00f2fe;
     border-radius: 10px;
     font-size: 18px;
     font-weight: 800;
@@ -428,8 +428,8 @@ body {
 }
 
 .amount-btn:active {
-    background: #10b981;
-    color: #fff;
+    background: #00f2fe;
+    color: #0d0e12;
 }
 
 .close-btn {

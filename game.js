@@ -150,16 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let start = 0;
 
         // 1. Сначала рисуем ГЛОУ (свечение) для каждого сегмента отдельно
-        // Рисуем дуги чуть шире, чем само колесо, с большой тенью
+        // Рисуем дуги чуть вглубь колеса (r=140), чтобы тень выходила наружу
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
             ctx.save();
             ctx.beginPath();
-            ctx.arc(150, 150, 146, start, start + slice);
-            ctx.shadowBlur = 40; // Мощное свечение
+            ctx.arc(150, 150, 142, start, start + slice); // r=142
+            ctx.shadowBlur = 45; // Ещё более мощное свечение
             ctx.shadowColor = p.color;
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 6; // Толще линия — ярче свечение
             ctx.stroke();
             ctx.restore();
             start += slice;
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             myBalance -= val;
             updateBalanceUI();
-            handleNewBet(val, myUsername, '#10b981');
+            handleNewBet(val, myUsername, null);
             betInput.value = '';
         }
     });
@@ -391,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGame() {
         players = [];
+        colorIndex = Math.floor(Math.random() * 360); // РАНДОМНЫЙ ЦВЕТ ДЛЯ ВСЕХ В НОВОМ РАУНДЕ
         roundTime = 120; // ВОЗВРАЩАЕМ 2 МИНУТЫ
         isSpinning = false;
         timerStarted = false;
