@@ -142,10 +142,10 @@ body {
 
 .pot-total {
     font-size: 26px;
-    color: #00f2fe;
+    color: #00ffaa;
     font-weight: 800;
     margin-top: 5px;
-    text-shadow: 0 0 15px #00f2fe, 0 0 5px #fff;
+    text-shadow: 0 0 15px #00ffaa, 0 0 5px #fff;
 }
 
 /* Betting Panel */
@@ -210,7 +210,7 @@ body {
 }
 
 .bet-btn-main {
-    background: #00f2fe;
+    background: #10b981;
     color: #0d0e12;
     border: none;
     border-radius: 8px;
@@ -219,13 +219,13 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
 }
 
 .bet-btn-main:active {
     transform: scale(0.95);
-    background: #00d2fe;
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+    background: #059669;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.8);
 }
 
 .bet-actions-quick {
@@ -259,8 +259,8 @@ body {
 }
 
 .status-dot.connected {
-    background: #00f2fe;
-    box-shadow: 0 0 5px #00f2fe;
+    background: #10b981;
+    box-shadow: 0 0 5px #10b981;
 }
 
 .status-dot.disconnected {

@@ -51,11 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // ГЕНЕРАТОР ЦВЕТОВ (Golden Ratio) - Идеально разные цвета
-    let colorIndex = Math.floor(Math.random() * 360); // РАНДОМНЫЙ ЦВЕТ ПРИ ЗАПУСКЕ
+    let colorIndex = Math.floor(Math.random() * 360);
     function getNextNeonColor() {
-        const goldenAngle = 137.508; // Золотой угол
+        // Используем Золотой Угол для максимального разброса
+        const goldenAngle = 137.508;
         const hue = (colorIndex * goldenAngle) % 360;
-        colorIndex++;
+        colorIndex += 1; // Увеличиваем индекс для следующего игрока
         return `hsl(${hue}, 100%, 50%)`; // Максимальная насыщенность (Неон)
     }
 
@@ -377,14 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // В центре пишем кто победил
             timerDisplay.textContent = "Winner!";
             timerDisplay.style.fontSize = "20px";
-            timerDisplay.style.color = "#00f2fe";
+            timerDisplay.style.color = "#00ffaa"; // ПРИЯТНЫЙ ЗЕЛЕНЫЙ ДЛЯ ПОБЕДЫ
 
             // Показываем имя И сумму выигрыша (многострочно)
             const fontSize = winner.name.length > 12 ? "12px" : "15px";
             const potContainer = document.getElementById('pot-total-container');
             potContainer.innerHTML = `
                 <div style="font-size: ${fontSize}; color: #fff; font-weight: 700; line-height: 1.1;">${winner.name}</div>
-                <div style="font-size: 14px; color: #00f2fe; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
+                <div style="font-size: 14px; color: #00ffaa; font-weight: 800; margin-top: 2px;">+${payout.toFixed(2)} USDT</div>
             `;
 
             // Уведомление ТОЛЬКО если выиграл я
