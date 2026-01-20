@@ -259,8 +259,8 @@ body {
 }
 
 .status-dot.connected {
-    background: #10b981;
-    box-shadow: 0 0 5px #10b981;
+    background: #00f2fe;
+    box-shadow: 0 0 5px #00f2fe;
 }
 
 .status-dot.disconnected {

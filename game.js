@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // ГЕНЕРАТОР ЦВЕТОВ (Golden Ratio) - Идеально разные цвета
-    let colorIndex = 0;
+    let colorIndex = Math.floor(Math.random() * 360); // РАНДОМНЫЙ ЦВЕТ ПРИ ЗАПУСКЕ
     function getNextNeonColor() {
         const goldenAngle = 137.508; // Золотой угол
         const hue = (colorIndex * goldenAngle) % 360;
@@ -150,17 +150,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let start = 0;
 
         // 1. Сначала рисуем ГЛОУ (свечение) для каждого сегмента отдельно
-        // Рисуем дуги чуть вглубь колеса (r=140), чтобы тень выходила наружу
         players.forEach(p => {
             const slice = (p.bet / total) * 2 * Math.PI;
             ctx.save();
             ctx.beginPath();
-            ctx.arc(150, 150, 142, start, start + slice); // r=142
-            ctx.shadowBlur = 45; // Ещё более мощное свечение
+            ctx.arc(150, 150, 142, start, start + slice);
+
+            // Внешний мощный ореол
+            ctx.shadowBlur = 50;
             ctx.shadowColor = p.color;
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 6; // Толще линия — ярче свечение
+            ctx.lineWidth = 8;
             ctx.stroke();
+
+            // Внутренний яркий фокус (второй слой для плотности)
+            ctx.shadowBlur = 20;
+            ctx.stroke();
+
             ctx.restore();
             start += slice;
         });
