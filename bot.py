@@ -100,7 +100,8 @@ game_state = {
     "status": "waiting", # waiting, spinning
     "last_winner": None,
     "total_bank": 0.0,
-    "spin_start_ms": 0   # Для синхронизации анимации
+    "spin_start_ms": 0,
+    "round_end_ms": 0    # Точное время окончания раунда
 }
 
 # Блокировка для предотвращения Race Condition при ставках
@@ -113,6 +114,7 @@ def reset_global_game():
     game_state["last_winner"] = None
     game_state["total_bank"] = 0.0
     game_state["spin_start_ms"] = 0
+    game_state["round_end_ms"] = 0
     print("♻️ GLOBAL GAME RESET")
 
 def calculate_winner():
@@ -136,9 +138,15 @@ async def game_loop():
         if game_state["status"] == "waiting":
             # Таймер идет ТОЛЬКО если есть хотя бы 2 игрока (или 1 игрок и боты)
             if len(game_state["players"]) >= 2:
-                if game_state["round_time"] > 0:
-                    game_state["round_time"] -= 1
-                else:
+                # Если раунд только начался (таймер был 120), ставим метку окончания
+                if game_state["round_end_ms"] == 0:
+                    game_state["round_end_ms"] = int((time.time() + game_state["round_time"]) * 1000)
+
+                # Каждую секунду обновляем round_time для обратной совместимости
+                remaining = int((game_state["round_end_ms"] / 1000) - time.time())
+                game_state["round_time"] = max(0, remaining)
+
+                if game_state["round_time"] <= 0:
                     # ВРЕМЯ ВЫШЛО -> КРУТИМ
                     game_state["status"] = "spinning"
                     game_state["spin_start_ms"] = int(time.time() * 1000)

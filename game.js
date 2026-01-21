@@ -134,8 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // 1. Синхронизируем список игроков
             players = state.players;
 
-            // 2. Синхронизируем таймер
-            roundTime = state.round_time;
+            // 2. Синхронизируем таймер через точную метку времени
+            if (state.round_end_ms) {
+                const remaining = Math.max(0, Math.floor((state.round_end_ms - Date.now()) / 1000));
+                roundTime = remaining;
+            } else {
+                roundTime = state.round_time;
+            }
 
             // 3. Синхронизируем статус раунда
             if (state.status === 'spinning' && !isSpinning) {
@@ -152,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     startSpinProcess(state.last_winner, elapsed);
                 }
-            } else if (state.status === 'waiting' && isSpinning) {
-                // Раунд закончился на сервере, сбрасываем локально
+            } else if (state.status === 'waiting' && isSpinning && timerDisplay.textContent !== "Winner!") {
+                // Сбрасываем только если уже НЕ показываем победителя
                 resetGame();
             }
 
@@ -437,13 +442,17 @@ document.addEventListener('DOMContentLoaded', () => {
         wheelWrapper.style.transition = "none";
         // Если мы зашли посреди спина, нужно сразу повернуть на начальный угол по времени
         if (alreadyElapsedMs > 0) {
-            // Линейная аппроксимация для упрощения (в идеале нужно учитывать кубическую кривую)
+            // Линейная аппроксимация для упрощения 
             const progress = alreadyElapsedMs / 6000;
             const currentRot = targetRotation * progress;
             wheelWrapper.style.transform = `rotate(${currentRot - 90}deg)`;
         } else {
             wheelWrapper.style.transform = "rotate(-90deg)";
         }
+
+        // ВАЖНО: Форсируем перерисовку (Layout Flush), чтобы transition: none успел примениться
+        // Это фиксит баг на ПК, когда колесо "забывает" крутиться
+        void wheelWrapper.offsetHeight;
 
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
