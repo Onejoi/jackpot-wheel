@@ -421,39 +421,6 @@ async def handle_bet(request):
     print(f"💸 [API] СТАВКА: {name} поставил {amount} USDT. Остаток: {new_balance}")
     return web.json_response({"status": "ok", "new_balance": new_balance})
 
-async def handle_win(request):
-    data = await request.json()
-    uid = int(data.get("user_id"))
-    win_amount = float(data.get("amount"))
-    profit_fee = float(data.get("fee", 0)) 
-
-    print(f"🏆 [API] ВЫИГРЫШ: User {uid} получил +{win_amount} USDT (Комиссия: {profit_fee})")
-    
-    # 1. Обновляем баланс игрока в БД
-    update_user_balance(uid, win_amount)
-    
-    # 2. Обновляем прибыль админа в БД
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (profit_fee,))
-    conn.commit()
-    conn.close()
-
-    # 3. Отправляем уведомление в Telegram
-    new_balance = get_user_balance(uid)
-    try:
-        await bot.send_message(
-            uid, 
-            f"🎰 <b>ПОБЕДА В КОЛЕСЕ!</b>\n\n"
-            f"💰 Выигрыш: <b>+{win_amount:.2f} USDT</b>\n"
-            f"� Ваш баланс: <b>{new_balance:.2f} USDT</b>\n\n"
-            f"<i>Удачи в следующих раундах!</i>",
-            parse_mode="HTML"
-        )
-    except Exception as e:
-        logging.error(f"Failed to send win message to {uid}: {e}")
-
-    return web.json_response({"status": "ok", "new_balance": new_balance})
 
 
 async def run_api():
@@ -468,8 +435,6 @@ async def run_api():
     })
     
     # Регистрация маршрутов
-    win_res = app.router.add_resource("/api/win")
-    cors.add(win_res.add_route("POST", handle_win))
     
     bal_res = app.router.add_resource("/api/balance")
     cors.add(bal_res.add_route("GET", get_balance_handler))
