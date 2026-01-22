@@ -14,7 +14,7 @@ import hmac
 import hashlib
 import urllib.parse
 from operator import itemgetter
-from aiocryptopay import CryptoPay, Networks
+from aiocryptopay import AioCryptoPay, Networks
 
 # ---------------------------------------------
 # НАСТРОЙКИ
@@ -24,7 +24,7 @@ WEBAPP_URL = "https://turmsik.github.io/jackpot-wheel/"
 
 # ТОКЕН КРИПТОБОТА (Для тестов используй токен из @CryptoTestPayBot)
 CRYPTO_PAY_TOKEN = os.environ.get("CRYPTO_PAY_TOKEN", "ВАШ_ТОКЕН_ТУТ") 
-crypto = CryptoPay(token=CRYPTO_PAY_TOKEN, network=Networks.TEST_NET)
+crypto = AioCryptoPay(token=CRYPTO_PAY_TOKEN, network=Networks.TEST_NET)
 
 # ---------------------------------------------
 # БАЗА ДАННЫХ (SQLite)
