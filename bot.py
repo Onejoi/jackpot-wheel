@@ -159,51 +159,57 @@ async def game_loop():
                     game_state["last_winner"] = winner
                     
                     if winner:
-                        total_bank = sum(p["bet"] for p in game_state["players"])
-                        print(f"🎰 SPINNING! Bank: {total_bank} USDT. Winner: {winner['name']}")
+                        # Считаем в центах для точности
+                        total_cents = sum(int(p["bet"] * 100) for p in game_state["players"])
+                        print(f"🎰 SPINNING! Bank: {total_cents/100:.2f} USDT. Winner: {winner['name']}")
                         
-                        # Если победитель - реальный игрок (есть user_id)
+                        # Кому платим?
                         if winner.get("user_id"):
+                            # 1. Победил реальный игрок
                             uid = winner["user_id"]
-                            # Считаем в центах для точности
-                            total_cents = sum(int(p["bet"] * 100) for p in game_state["players"])
                             winner_bet_cents = int(winner["bet"] * 100)
                             
                             net_win_cents = int((total_cents - winner_bet_cents) * 0.90) # Налог 10%
                             profit_fee_cents = (total_cents - winner_bet_cents) - net_win_cents
                             payout_cents = winner_bet_cents + net_win_cents
                             
-                            # Теперь всё (БД и Телеграм) делаем С ЗАДЕРЖКОЙ, чтобы не спойлерить результат
-                            async def delayed_payout_process(user_id, amount_cents, fee_cents):
-                                await asyncio.sleep(8) # Ждем пока колесо докрутится
-                                
-                                # 1. Зачисляем в БД
+                            async def delayed_payout(user_id, amount_cents, fee_cents):
+                                await asyncio.sleep(8)
                                 update_user_balance(user_id, amount_cents)
-                                
-                                # 2. Обновляем профит админа
+                                # Записываем доход админа
                                 conn = sqlite3.connect('database.db')
                                 cursor = conn.cursor()
-                                cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (fee_cents / 100.0,))
+                                cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (fee_cents,))
                                 conn.commit()
                                 conn.close()
                                 
-                                # 3. Шлем уведомление
-                                final_amount = amount_cents / 100.0
-                                new_bal = get_user_balance(user_id)
                                 try:
+                                    new_bal = get_user_balance(user_id)
                                     await bot.send_message(
                                         user_id,
-                                        f"🎰 <b>ПОБЕДА В КОЛЕСЕ!</b>\n\n"
-                                        f"💰 Выигрыш: <b>+{final_amount:.2f} USDT</b>\n"
-                                        f"💳 Ваш баланс: <b>{new_bal:.2f} USDT</b>\n\n"
-                                        f"<i>Результат зачислен! Удачи!</i>",
+                                        f"🎰 <b>ПОБЕДА!</b>\n\n💰 Выигрыш: <b>+{amount_cents/100:.2f} USDT</b>\n💳 Баланс: <b>{new_bal:.2f} USDT</b>",
                                         parse_mode="HTML"
                                     )
                                 except: pass
                             
-                            asyncio.create_task(delayed_payout_process(uid, payout_cents, profit_fee_cents))
-                    
-                    # Ждем 10 секунд (время анимации + показ результата)
+                            asyncio.create_task(delayed_payout(uid, payout_cents, profit_fee_cents))
+                        else:
+                            # 2. Победил БОТ (вся ставка реальных игроков идет в доход админу)
+                            # Считаем сумму ставок ТОЛЬКО реальных игроков
+                            real_players_total_cents = sum(int(p["bet"] * 100) for p in game_state["players"] if p.get("user_id"))
+                            
+                            if real_players_total_cents > 0:
+                                async def delayed_bot_profit(fee_cents):
+                                    await asyncio.sleep(8)
+                                    conn = sqlite3.connect('database.db')
+                                    cursor = conn.cursor()
+                                    cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (fee_cents,))
+                                    conn.commit()
+                                    conn.close()
+                                    print(f"📈 Bot won. Admin profit increased by {fee_cents/100:.2f} USDT")
+                                
+                                asyncio.create_task(delayed_bot_profit(real_players_total_cents))
+
                     await asyncio.sleep(10)
                     reset_global_game()
 
@@ -408,14 +414,35 @@ async def set_bal_cmd(message: types.Message):
 
 @dp.message(Command("admin"))
 async def admin_panel(message: types.Message):
-    # В реале тут проверка на твой ID
+    # ВАЖНО: Впиши сюда свой Telegram ID для защиты!
+    ADMIN_IDS = [217731773, 0] # Замени 0 на свой ID (можно узнать в @userinfobot)
+    
+    if message.from_user.id not in ADMIN_IDS:
+        return await message.answer("🚫 Доступ запрещен. Только для владельца.")
+
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    
+    # Считаем сумму всех балансов юзеров (в центах)
     cursor.execute('SELECT SUM(balance) FROM users')
-    total_users_balance = cursor.fetchone()[0] or 0.0
+    total_users_balance_cents = cursor.fetchone()[0] or 0
+    
+    # Считаем прибыль админа (в центах)
     cursor.execute('SELECT value FROM stats WHERE key = "admin_profit"')
-    admin_profit = cursor.fetchone()[0] or 0.0
+    admin_profit_cents = cursor.fetchone()[0] or 0
+    
     conn.close()
+    
+    report = (
+        f"📊 <b>ФИНАНСОВЫЙ ОТЧЕТ (v4.2)</b>\n\n"
+        f"👥 <b>Чаша Игроков:</b> <code>{total_users_balance_cents/100:.2f} USDT</code>\n"
+        f"<i>(Столько денег игроки могут вывести прямо сейчас)</i>\n\n"
+        f"💰 <b>Твоя Чистая Прибыль:</b> <code>{admin_profit_cents/100:.2f} USDT</code>\n"
+        f"<i>(Твой заработок с налогов и проигрышей ботам)</i>\n\n"
+        f"💳 <b>Всего на кошельке:</b> <code>{(total_users_balance_cents + admin_profit_cents)/100:.2f} USDT</code>"
+    )
+    
+    await message.answer(report, parse_mode="HTML")
     
 async def get_balance_handler(request):
     init_data = request.headers.get("Authorization")
