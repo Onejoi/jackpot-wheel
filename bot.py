@@ -20,7 +20,7 @@ from aiocryptopay import CryptoPay, Networks
 # НАСТРОЙКИ
 # ---------------------------------------------
 BOT_TOKEN = "7967641942:AAH9CafrXRufn_x25U5n9WeVrm6Ty4P6y94"
-WEBAPP_URL = "https://onejoi.github.io/jackpot-wheel/"
+WEBAPP_URL = "https://turmsik.github.io/jackpot-wheel/"
 
 # ТОКЕН КРИПТОБОТА (Для тестов используй токен из @CryptoTestPayBot)
 CRYPTO_PAY_TOKEN = os.environ.get("CRYPTO_PAY_TOKEN", "ВАШ_ТОКЕН_ТУТ") 
