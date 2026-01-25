@@ -289,7 +289,6 @@ async def check_payments():
 
 @dp.message(Command("start"))
 async def start(message: types.Message, user: types.User = None, is_new: bool = False):
-    await set_main_menu_button(message.bot) # Принудительно обновляем кнопку при старте
     # Если зашли через команду — берем юзера из сообщения.
     # Если позвали из колбэка — используем переданного юзера.
     tgt_user = user if user else message.from_user
@@ -559,23 +558,12 @@ async def run_api():
     await site.start()
     print(f"✅ API Server started on port {port} (0.0.0.0)")
 
-async def set_main_menu_button(bot: Bot):
-    """Устанавливает кнопку слева от ввода текста на правильную ссылку игры"""
-    try:
-        await bot.set_chat_menu_button(
-            menu_button=MenuButtonWebApp(
-                text="JACKPOT GOLD 🏆",
-                web_app=WebAppInfo(url=WEBAPP_URL)
-            )
-        )
-        print(f"✅ Menu Button globally updated to: {WEBAPP_URL} (v{VERSION})")
-    except Exception as e:
-        print(f"⚠️ Error setting menu button: {e}")
+@dp.message(Command("start"))
+async def start(message: types.Message, user: types.User = None, is_new: bool = False):
 
 async def main():
     init_db()
     print(f"\n🚀 БОТ ЗАПУЩЕН (v{VERSION}) С БАЗОЙ ДАННЫХ!")
-    await set_main_menu_button(bot)
     
     # Запускаем API, бота и игровой цикл параллельно
     await asyncio.gather(
