@@ -558,8 +558,7 @@ async def run_api():
     await site.start()
     print(f"✅ API Server started on port {port} (0.0.0.0)")
 
-@dp.message(Command("start"))
-async def start(message: types.Message, user: types.User = None, is_new: bool = False):
+
 
 async def main():
     init_db()
