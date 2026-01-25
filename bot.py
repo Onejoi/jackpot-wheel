@@ -21,7 +21,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # НАСТРОЙКИ
 # ---------------------------------------------
 BOT_TOKEN = "7967641942:AAH9CafrXRufn_x25U5n9WeVrm6Ty4P6y94"
-WEBAPP_URL = "https://turmsik.github.io/jackpot-wheel/"
+WEBAPP_URL = "https://turmsik.github.io/jackpot-wheel/index.html"
 VERSION = "4.9"
 
 # ТОКЕН КРИПТОБОТА
