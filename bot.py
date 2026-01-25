@@ -15,13 +15,14 @@ import hashlib
 import urllib.parse
 from operator import itemgetter
 from aiocryptopay import AioCryptoPay, Networks
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ---------------------------------------------
 # НАСТРОЙКИ
 # ---------------------------------------------
 BOT_TOKEN = "7967641942:AAH9CafrXRufn_x25U5n9WeVrm6Ty4P6y94"
 WEBAPP_URL = "https://turmsik.github.io/jackpot-wheel/"
-VERSION = "4.6"
+VERSION = "4.9"
 
 # ТОКЕН КРИПТОБОТА
 CRYPTO_PAY_TOKEN = os.environ.get("CRYPTO_PAY_TOKEN", "ВАШ_ТОКЕН_ТУТ") 
@@ -288,6 +289,7 @@ async def check_payments():
 
 @dp.message(Command("start"))
 async def start(message: types.Message, user: types.User = None, is_new: bool = False):
+    await set_main_menu_button(message.bot) # Принудительно обновляем кнопку при старте
     # Если зашли через команду — берем юзера из сообщения.
     # Если позвали из колбэка — используем переданного юзера.
     tgt_user = user if user else message.from_user
@@ -557,24 +559,23 @@ async def run_api():
     await site.start()
     print(f"✅ API Server started on port {port} (0.0.0.0)")
 
-async def setup_menu_button():
-    """Устанавливает кнопку Mini App рядом с полем ввода"""
+async def set_main_menu_button(bot: Bot):
+    """Устанавливает кнопку слева от ввода текста на правильную ссылку игры"""
     try:
-        from aiogram.types import MenuButtonWebApp, WebAppInfo as AIOWebAppInfo
         await bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
-                text="Играть 🎮",
-                web_app=AIOWebAppInfo(url=WEBAPP_URL)
+                text="JACKPOT GOLD 🏆",
+                web_app=WebAppInfo(url=WEBAPP_URL)
             )
         )
-        print("✅ Menu Button updated successfully!")
+        print(f"✅ Menu Button globally updated to: {WEBAPP_URL} (v{VERSION})")
     except Exception as e:
-        print(f"⚠️ Failed to update menu button: {e}")
+        print(f"⚠️ Error setting menu button: {e}")
 
 async def main():
     init_db()
     print(f"\n🚀 БОТ ЗАПУЩЕН (v{VERSION}) С БАЗОЙ ДАННЫХ!")
-    await setup_menu_button()
+    await set_main_menu_button(bot)
     
     # Запускаем API, бота и игровой цикл параллельно
     await asyncio.gather(
