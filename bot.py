@@ -214,9 +214,12 @@ async def game_loop():
                                     conn = sqlite3.connect('database.db')
                                     cursor = conn.cursor()
                                     cursor.execute('UPDATE stats SET value = value + ? WHERE key = "admin_profit"', (fee_cents,))
-                                    conn.commit()
-                                    conn.close()
-                                    print(f"📈 Bot won. Admin profit increased by {fee_cents/100:.2f} USDT")
+                                    menu_button=MenuButtonWebApp(
+                text="Jackpot Wheel 🏆",
+                web_app=WebAppInfo(url=WEBAPP_URL)
+            )
+        )
+        print(f"✅ Menu Button globally updated to: {WEBAPP_URL} (v{VERSION})")
                                 
                                 asyncio.create_task(delayed_bot_profit(real_players_total_cents))
 
@@ -296,7 +299,7 @@ async def start(message: types.Message, user: types.User = None, is_new: bool = 
     balance = get_user_balance(user_id)
     
     text = (
-        f"🎰 <b>JACKPOT WHEEL</b> — Крути колесо и забирай банк! 🚀🏆\n\n"
+        f"🎰 <b>Jackpot Wheel</b> — Крути колесо и забирай банк! 🚀🏆\n\n"
         f"👤 Игрок: <b>{tgt_user.full_name}</b>\n"
         f"💰 Баланс: <b>{balance:.2f} USDT</b>\n\n"
         f"💡 <i>Советуем прочитать информацию о проекте перед игрой! 👇</i>"
